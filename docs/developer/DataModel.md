@@ -371,7 +371,7 @@ public class Employee : AuditableEntity
 
 ## ProcessFolder
 
-The grey folder rows in the left sidebar ("The Business 9", "HH PROCESS 12"). It is
+The grey folder rows in the left sidebar ("The Business 9", "Client Onboarding 12"). It is
 just a container so long lists stay navigable.
 
 | Property        | Type     | Rules | Notes |

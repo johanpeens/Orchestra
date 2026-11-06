@@ -2,6 +2,11 @@
 
 *Man and bot, playing together.*
 
+![Orchestra: the sign-in screen on the left, and the first choice screen on the right](wiki/images/orchestra-overview.png)
+
+**Left:** sign in. **Right:** after signing in, pick where to start: Business Process, Team, Chat or My Training Data.
+New here? Read the [plain-language wiki](wiki/Home.md).
+
 Process documentation for a business, with a chatbot that answers from it.
 
 Folders hold **processes**, processes hold ordered **steps**, and each step names the

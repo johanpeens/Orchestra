@@ -209,8 +209,8 @@ internal sealed class MockDataStore
             SortOrder = 1
         };
 
-        // The designs label this folder "HH PROCESS". Renamed here - the initials
-        // are a leftover from the old branding.
+        // The original designs used a different folder name. It is called
+        // Client Onboarding here.
         MockProcessFolder onboarding = new()
         {
             Id = NextProcessFolderId(),
