@@ -7,6 +7,12 @@
 **Left:** sign in. **Right:** after signing in, pick where to start: Business Process, Team, Chat or My Training Data.
 New here? Read the [plain-language wiki](wiki/Home.md).
 
+### Ask the bot
+
+![The Chat screen with example questions and the bot peeking in from the side](wiki/images/chat-start.png)
+
+The Chat screen answers only from what has been written down. Press an example question or type your own.
+
 Process documentation for a business, with a chatbot that answers from it.
 
 Folders hold **processes**, processes hold ordered **steps**, and each step names the
