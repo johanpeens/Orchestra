@@ -1,0 +1,153 @@
+# ******************************************************************************
+# Purpose : Continuous integration for the Team Portal. Implements every gate in
+#           Frontend/CI.md. A pull request that fails any stage cannot be merged.
+# Ticket  : SD-PENDING
+# ******************************************************************************
+# Date            By                      Action
+# ******************************************************************************
+# 23 Aug 2026     Orchestra Team          Created
+# ******************************************************************************
+
+trigger:
+  branches:
+    include:
+      - main
+      - release/*
+
+pr:
+  branches:
+    include:
+      - main
+      - release/*
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  buildConfiguration: Release
+  dotnetVersion: 9.0.x
+  solution: TeamPortal.sln
+  coverageThreshold: 80
+
+stages:
+  - stage: Build
+    displayName: Build and verify
+    jobs:
+      - job: Gates
+        displayName: CI gates
+        steps:
+
+          - task: UseDotNet@2
+            displayName: Install .NET SDK
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+
+          # --- Gate 1: Restore ------------------------------------------------
+          - task: DotNetCoreCLI@2
+            displayName: "Gate 1 - Restore"
+            inputs:
+              command: restore
+              projects: $(solution)
+              feedsToUse: select
+
+          # --- Gate 2: Build, zero warnings -----------------------------------
+          # TreatWarningsAsErrors is set in Directory.Build.props, so any warning
+          # fails this step. Do not add -warnaserror:none to get a build through.
+          - task: DotNetCoreCLI@2
+            displayName: "Gate 2 - Build (warnings are errors)"
+            inputs:
+              command: build
+              projects: $(solution)
+              arguments: >-
+                --configuration $(buildConfiguration)
+                --no-restore
+
+          # --- Gate 3: Format check -------------------------------------------
+          - script: dotnet format $(solution) --verify-no-changes --no-restore --severity warn
+            displayName: "Gate 3 - Format check"
+
+          # --- Gate 4: Unit tests, 80% line coverage --------------------------
+          - task: DotNetCoreCLI@2
+            displayName: "Gate 4 - Unit tests with coverage"
+            inputs:
+              command: test
+              projects: $(solution)
+              arguments: >-
+                --configuration $(buildConfiguration)
+                --no-build
+                --logger trx
+                --collect:"XPlat Code Coverage"
+                --
+                DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+              publishTestResults: true
+
+          - task: reportgenerator@5
+            displayName: "Gate 4 - Merge coverage and enforce threshold"
+            inputs:
+              reports: "$(Agent.TempDirectory)/**/coverage.cobertura.xml"
+              targetdir: "$(Build.ArtifactStagingDirectory)/coverage"
+              reporttypes: "Cobertura;HtmlInline_AzurePipelines"
+              # Only the layers that carry logic are gated. The Web project's
+              # coverage comes from bUnit and is reported, not enforced.
+              assemblyfilters: "+TeamPortal.Application;+TeamPortal.Mock;+TeamPortal.Infrastructure"
+
+          - task: PublishCodeCoverageResults@2
+            displayName: "Publish coverage"
+            inputs:
+              summaryFileLocation: "$(Build.ArtifactStagingDirectory)/coverage/Cobertura.xml"
+
+          - task: BuildQualityChecks@9
+            displayName: "Gate 4 - Fail under $(coverageThreshold)% lines"
+            inputs:
+              checkCoverage: true
+              coverageFailOption: fixed
+              coverageType: lines
+              coverageThreshold: $(coverageThreshold)
+
+          # --- Gate 5: MudBlazor-first lint -----------------------------------
+          - task: PowerShell@2
+            displayName: "Gate 5 - MudBlazor-first lint"
+            inputs:
+              filePath: build/Invoke-MudBlazorLint.ps1
+              pwsh: true
+
+          # --- Gate 6: Code-behind lint ---------------------------------------
+          - task: PowerShell@2
+            displayName: "Gate 6 - No @code blocks in .razor"
+            inputs:
+              filePath: build/Invoke-CodeBehindLint.ps1
+              pwsh: true
+
+          # --- Gate 7: Accessibility scan -------------------------------------
+          - task: PowerShell@2
+            displayName: "Gate 7 - Accessibility scan"
+            inputs:
+              filePath: build/Invoke-AccessibilityLint.ps1
+              pwsh: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish web app
+            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+            inputs:
+              command: publish
+              projects: src/TeamPortal.Web/TeamPortal.Web.csproj
+              arguments: >-
+                --configuration $(buildConfiguration)
+                --no-build
+                --output $(Build.ArtifactStagingDirectory)/web
+              zipAfterPublish: true
+              publishWebProjects: false
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish artefact
+            condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+            inputs:
+              pathToPublish: $(Build.ArtifactStagingDirectory)/web
+              artifactName: web
+
+# ******************************************************************************
+# Deployment is deliberately not in this file. The same artefact is promoted
+# DEV -> SIT -> UAT -> PROD by a release pipeline, never rebuilt per environment.
+# See Frontend/CI.md, Release Pipeline.
+# ******************************************************************************

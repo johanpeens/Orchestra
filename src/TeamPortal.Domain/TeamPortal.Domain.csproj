@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!--
+      The only dependency Domain is allowed. It provides IdentityUser<TKey> and
+      friends, which AppUser/AppRole inherit from, and pulls in no EF Core - so
+      Domain stays free of persistence concerns. If Domain ever needs a
+      "using Microsoft.EntityFrameworkCore", something has gone wrong.
+    -->
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" />
+  </ItemGroup>
+
+</Project>

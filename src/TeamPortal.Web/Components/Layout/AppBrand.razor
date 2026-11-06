@@ -1,0 +1,13 @@
+@* Brand mark: the icon tile on its own. The wordmark beside it was taking room
+   from the section pills for no information - the tab title already says where
+   you are, and nobody needs the product's name repeated on every screen of it.
+
+   The tile is NOT aria-hidden any more. It was, and correctly, while the
+   wordmark sat next to it carrying the same meaning as text; with the text gone
+   this is the only brand element on the page, so it has to say what it is. *@
+
+<a class="app-brand" href="/" aria-label="Orchestra - home">
+    <div class="app-brand__tile" aria-hidden="true">
+        <MudIcon Icon="@Icons.Material.Filled.Hub" Size="Size.Small" Style="color: white;" />
+    </div>
+</a>

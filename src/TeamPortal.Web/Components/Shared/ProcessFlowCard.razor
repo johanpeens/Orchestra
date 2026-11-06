@@ -1,0 +1,52 @@
+@* One card in the process flow strip. The strip shows the PROCESSES in a folder;
+   each one holds its own steps. See docs/design/02-process-dashboard.png.
+
+   A plain button, NOT wrapped in a MudTooltip. Wrapping it in one swallowed the
+   click - the tooltip root handles pointerup, and selecting a process stopped
+   working entirely. The same failure as a button nested inside a MudMenu
+   activator. The preview it used to host is rendered by the page instead, in a
+   band under the strip: the rail scrolls horizontally, so anything positioned
+   over a card gets clipped by its overflow anyway. *@
+
+@* HOVER PREVIEW IS OFF.
+
+   The two handlers that drove it are removed rather than commented out, and
+   deliberately so: a Razor comment inside an element's attribute list is not a
+   comment at all. Razor emits it as an attribute NAME, the browser throws
+   InvalidCharacterError from setAttribute, and that kills the circuit on every
+   render. This exact mistake took the page down earlier.
+
+   To bring it back, put these two back on the button below, and nothing else
+   needs changing - ProcessPage still listens and still renders the panel:
+
+       @@onmouseenter="@@(args => OnPreviewWanted.InvokeAsync(
+           new PreviewRequest(Process.Id, args.ClientX, args.ClientY)))"
+       @@onfocus="@@(() => OnPreviewWanted.InvokeAsync(
+           new PreviewRequest(Process.Id, null, null)))"
+
+   If it does come back: mouseENTER, never mouseover. mouseover bubbles and
+   re-fires every time the pointer crosses a child - the number, the name, the
+   tag - so sweeping across the strip sent a storm of round trips down the
+   circuit and the page stopped responding. And the focus handler is what makes
+   the preview reachable by keyboard at all. *@
+<button type="button"
+        class="@CardClass"
+        style="@TagStyle"
+        aria-current="@(Selected ? "step" : null)"
+        aria-label="@AriaLabel"
+        @onclick="@(() => OnSelect.InvokeAsync(Process.Id))"
+        @ondblclick="@(() => OnOpenDetail.InvokeAsync(Process.Id))">
+
+    <div class="app-stepcard__top">
+        <span class="app-stepcard__number">@Number</span>
+
+        @* justification: the dot repeats the status, which is already spelled out
+           in this card's aria-label. *@
+        <span class="app-stepcard__dot"
+              style="@($"background:{Process.StatusColour};")"
+              aria-hidden="true"></span>
+    </div>
+
+    <div class="app-stepcard__name">@Process.Name</div>
+
+</button>

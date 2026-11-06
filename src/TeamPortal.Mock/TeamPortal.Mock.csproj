@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TeamPortal.Application\TeamPortal.Application.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <!-- MockOptions.ConsumeFailureFlag is internal; the tests exercise it. -->
+    <InternalsVisibleTo Include="TeamPortal.Services.Tests" />
+    <InternalsVisibleTo Include="TeamPortal.Web.Tests" />
+  </ItemGroup>
+</Project>

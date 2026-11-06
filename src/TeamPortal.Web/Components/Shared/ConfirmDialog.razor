@@ -1,0 +1,39 @@
+@* The single confirmation dialog for the whole app. Every destructive action
+   routes through this - see Frontend/TeamConventions.md, Dialogs & Modals.
+
+   Button order is mandated: the confirming action sits LEFT, Cancel sits RIGHT. *@
+
+<MudDialog Class="app-dialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Title</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudText Typo="Typo.body1">@Message</MudText>
+
+        @if (!string.IsNullOrWhiteSpace(Warning))
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-4">
+                @Warning
+            </MudAlert>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Filled"
+                   Color="@ConfirmColour"
+                   OnClick="Confirm"
+                   Disabled="_working">
+            @ConfirmText
+        </MudButton>
+
+        <MudSpacer />
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   OnClick="Cancel"
+                   Disabled="_working">
+            @CancelText
+        </MudButton>
+    </DialogActions>
+</MudDialog>

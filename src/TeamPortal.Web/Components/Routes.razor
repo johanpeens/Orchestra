@@ -1,0 +1,21 @@
+@* NotFoundPage on Router is .NET 10 only. On .NET 9 a 404 is handled by
+   UseStatusCodePagesWithReExecute("/not-found") in Program.cs, which re-executes
+   the request against the NotFound page. *@
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        @* AuthorizeRouteView, not RouteView. Endpoint authorisation covers the
+           first request; once the circuit is running, navigation happens inside
+           it and never touches the endpoint again. Without this, [Authorize] on
+           a page stops meaning anything the moment the app is interactive. *@
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <RedirectToLogin />
+            </NotAuthorized>
+            <Authorizing>
+                <LoadingPanel Message="Checking your access..." />
+            </Authorizing>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

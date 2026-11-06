@@ -1,0 +1,55 @@
+@page "/"
+@attribute [Authorize]
+
+<PageTitle>Orchestra</PageTitle>
+
+<div class="app-home">
+
+    <header class="app-home__head">
+        <h1 class="app-home__title">Orchestra</h1>
+        <p class="app-home__subtitle">Man and bot, playing together with pure grounded data</p>
+    </header>
+
+    @* The subtitle, drawn. alt is empty and it is aria-hidden on purpose: the
+       line above says the same thing in words, so describing the picture too
+       would make a screen reader read the idea twice. *@
+    <img class="app-home__hero"
+         src="Home.svg"
+         
+         aria-hidden="true"
+         width="817"
+         height="589" />
+
+    <div class="app-home__tiles">
+        @foreach (HomeTile tile in Tiles)
+        {
+            @* A link, not a div with a click handler. Middle-click, open in a new
+               tab and the keyboard all work for free, and none of them would if
+               this were a button pretending to be a link. *@
+            <a class="app-home__tile" href="@tile.Href" @key="tile.Href">
+
+                @* Room for artwork. Drop an SVG at the path below and it is used;
+                   until then the icon stands in. Sized by CSS either way, so
+                   adding art cannot change the tile's shape. *@
+                <div class="app-home__art" aria-hidden="true">
+                    @if (HasArt(tile))
+                    {
+                        <img src="@ArtPath(tile)" alt="" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@tile.Icon" Size="Size.Large" />
+                    }
+                </div>
+
+                <div class="app-home__name">@tile.Name</div>
+                <p class="app-home__purpose">@tile.Purpose</p>
+
+                @* What clicking actually does. Revealed on hover and on keyboard
+                   focus - but always in the DOM, so a screen reader reads it as
+                   part of the link rather than never hearing it at all. *@
+                <span class="app-home__action">@tile.OnClick</span>
+            </a>
+        }
+    </div>
+</div>

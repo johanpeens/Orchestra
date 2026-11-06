@@ -1,0 +1,49 @@
+@* One "Add" button had to become a question, because the page holds two things
+   you can add and they are a level apart: a PROCESS is a card in the flow strip,
+   a STEP is a row inside the one you are reading.
+
+   Two full-width choices rather than a menu. MudMenu has swallowed clicks in
+   this codebase before - a button nested in its activator stops working - and
+   this is the kind of thing that must not silently fail. *@
+
+<MudDialog>
+    <TitleContent>
+        <div class="app-addchooser__title">
+            <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+            <span>What would you like to add?</span>
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <div class="app-addchooser">
+
+            <button type="button"
+                    class="app-addchooser__choice"
+                    @onclick="@(() => Choose(AddChoice.Step))">
+                <MudIcon Icon="@Icons.Material.Outlined.FormatListNumbered"
+                         Class="app-addchooser__icon" />
+                <span class="app-addchooser__name">A step</span>
+                <span class="app-addchooser__what">
+                    Another row inside <strong>@ProcessName</strong> - a thing somebody
+                    does, with the people responsible and a screenshot.
+                </span>
+            </button>
+
+            <button type="button"
+                    class="app-addchooser__choice"
+                    @onclick="@(() => Choose(AddChoice.Process))">
+                <MudIcon Icon="@Icons.Material.Outlined.AccountTree"
+                         Class="app-addchooser__icon" />
+                <span class="app-addchooser__name">A process</span>
+                <span class="app-addchooser__what">
+                    A new card in <strong>@FolderName</strong>, with its own steps
+                    underneath it.
+                </span>
+            </button>
+        </div>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>

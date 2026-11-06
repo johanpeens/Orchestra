@@ -1,0 +1,28 @@
+@* The section control next to the brand mark.
+
+   The designs show a single "Business Process" pill and no visible way to reach
+   the other sections at all. Rendered as pills instead: a hidden dropdown left
+   the member screens unreachable, which is worse than deviating slightly. *@
+
+<nav class="app-sections" aria-label="Section">
+    <a class="@PillClass(AppSection.Team)"
+       href="/team"
+       aria-current="@Current(AppSection.Team)">
+        <MudIcon Icon="@Icons.Material.Outlined.Groups" Size="Size.Small" />
+        <span>Team</span>
+    </a>
+
+    <a class="@PillClass(AppSection.Process)"
+       href="/processes"
+       aria-current="@Current(AppSection.Process)">
+        <MudIcon Icon="@Icons.Material.Outlined.AccountTree" Size="Size.Small" />
+        <span>Business Process</span>
+    </a>
+
+    <a class="@PillClass(AppSection.Chat)"
+       href="/chat"
+       aria-current="@Current(AppSection.Chat)">
+        <MudIcon Icon="@Icons.Material.Outlined.ChatBubbleOutline" Size="Size.Small" />
+        <span>Chat</span>
+    </a>
+</nav>

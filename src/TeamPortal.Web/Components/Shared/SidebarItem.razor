@@ -1,0 +1,25 @@
+@* One row in the sidebar: icon, label, count chip. The selected row gets a
+   filled light-purple rounded background, as in docs/design/02 and docs/design/05. *@
+
+<div class="app-sidebar__rowgroup">
+    <a class="@RowClass" href="@Href" aria-current="@(Selected ? "page" : null)">
+        <MudIcon Icon="@Icon" Size="Size.Small" Class="app-sidebar__icon" />
+        <span class="app-sidebar__label">@Label</span>
+
+        @if (Count is int count)
+        {
+            <span class="app-sidebar__count">@count</span>
+        }
+    </a>
+
+    @* Outside the anchor, not inside it. A button nested in a link is invalid
+       HTML and the click goes to whichever the browser feels like. *@
+    @if (OnDelete.HasDelegate)
+    {
+        <MudIconButton Icon="@Icons.Material.Outlined.DeleteOutline"
+                       Size="Size.Small"
+                       Class="app-sidebar__delete"
+                       aria-label="@($"Delete {Label}")"
+                       OnClick="OnDelete" />
+    }
+</div>

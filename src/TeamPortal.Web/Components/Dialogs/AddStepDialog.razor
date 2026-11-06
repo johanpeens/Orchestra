@@ -1,0 +1,271 @@
+@* Screen 04. Step name, description, department, responsible-person chips and
+   the screenshot drop zone. See docs/design/04-add-step-modal.png. *@
+
+<MudDialog Class="app-dialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(IsNew ? "Add Step" : "Edit Step")</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        @if (_formError is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4" role="alert">
+                @_formError
+            </MudAlert>
+        }
+
+        @* Three tabs rather than one long scroll. The dialog had the step, its
+           people and its screenshot stacked vertically, which pushed Save below
+           the fold and made the drop zone the thing you saw last.
+
+           The name field lives on the first tab and is the only required one, so
+           a validation error there switches back to it - see SaveAsync. *@
+        @* KeepPanelsAlive, because these three panels are one form. MudTabs
+           throws away the panel you leave, which would tear down the file
+           upload and the owner picker mid-edit. *@
+        <MudTabs Elevation="0"
+                 Rounded="true"
+                 ApplyEffectsToContainer="true"
+                 KeepPanelsAlive="true"
+                 @bind-ActivePanelIndex="_activeTab">
+
+            <MudTabPanel Text="Step" Icon="@Icons.Material.Outlined.Description">
+
+        <label class="app-field__label" for="step-name">Step Name *</label>
+        <MudTextField @bind-Value="_name"
+                      @bind-Value:after="ClearErrors"
+                      id="step-name"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Immediate="true"
+                      Placeholder="Add Step"
+                      Error="@(_nameError is not null)"
+                      ErrorText="@_nameError" />
+
+        <label class="app-field__label" for="step-desc">Step Description</label>
+        <MudTextField @bind-Value="_description"
+                      @bind-Value:after="ClearErrors"
+                      id="step-desc"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Lines="3"
+                      Immediate="true"
+                      Placeholder="Describe the workflow, key requirements, and outcomes expected for this process..." />
+
+        <label class="app-field__label" for="step-dept">Department</label>
+        <MudSelect @bind-Value="_departmentId"
+                   T="int?"
+                   id="step-dept"
+                   Clearable="true"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense">
+            @foreach (var department in _departments)
+            {
+                <MudSelectItem T="int?" Value="@department.Id">@department.Name</MudSelectItem>
+            }
+        </MudSelect>
+
+            </MudTabPanel>
+
+            <MudTabPanel Text="@OwnerTabLabel" Icon="@Icons.Material.Outlined.Group">
+
+        <div class="app-stepdialog__ownerhead">
+            <span class="app-field__label">Responsible Persons</span>
+
+            <MudButton Variant="Variant.Text"
+                       Size="Size.Small"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="ToggleOwnerPicker">
+                Add Team Member
+            </MudButton>
+        </div>
+
+        <div class="app-stepdialog__chips">
+            @if (_ownerIds.Count == 0)
+            {
+                <MudText Typo="Typo.body2" Class="app-stepdialog__noowners">
+                    Nobody assigned yet.
+                </MudText>
+            }
+
+            @foreach (var ownerId in _ownerIds)
+            {
+                var id = ownerId;
+                var person = _people.FirstOrDefault(p => p.Id == id);
+
+                <span class="app-stepdialog__chip">
+                    @(person?.FullName ?? "Unknown")
+                    <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                                   Size="Size.Small"
+                                   Class="app-stepdialog__chipremove"
+                                   aria-label="@($"Remove {person?.FullName}")"
+                                   OnClick="@(() => RemoveOwner(id))" />
+                </span>
+            }
+        </div>
+
+        @if (_showOwnerPicker)
+        {
+            @* Autocomplete, not a select. Eight people fit in a dropdown; a real
+               department does not, and scrolling a list to find a name is the
+               thing everybody complains about last.
+
+               Value stays null so the box clears itself after each pick - the
+               control adds an owner rather than holding one. It used to be a
+               MudSelect bound to the literal 0, which is why the field showed
+               "0" instead of a prompt. *@
+            <MudAutocomplete T="EmployeeOptionDto"
+                             Value="null"
+                             ValueChanged="AddOwner"
+                             SearchFunc="SearchPeopleAsync"
+                             ToStringFunc="@(p => p?.FullName ?? string.Empty)"
+                             Label="Choose a person"
+                             Placeholder="Start typing a name or a role"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             ResetValueOnEmptyText="true"
+                             CoerceText="false"
+                             MinCharacters="0"
+                             MaxItems="50"
+                             Immediate="true"
+                             Class="app-stepdialog__picker">
+                <ItemTemplate Context="person">
+                    <div class="app-personoption">
+                        <MudAvatar Size="Size.Small"
+                                   Color="Color.Primary"
+                                   Class="app-personoption__avatar">
+                            @if (!string.IsNullOrWhiteSpace(person.PhotoUrl))
+                            {
+                                <MudImage Src="@person.PhotoUrl" Alt="" />
+                            }
+                            else
+                            {
+                                @Initials(person.FullName)
+                            }
+                        </MudAvatar>
+
+                        <div class="app-personoption__text">
+                            <span class="app-personoption__name">@person.FullName</span>
+                            @if (!string.IsNullOrWhiteSpace(person.JobTitle))
+                            {
+                                <span class="app-personoption__role">@person.JobTitle</span>
+                            }
+                        </div>
+                    </div>
+                </ItemTemplate>
+
+                <NoItemsTemplate>
+                    <div class="app-personoption__empty">Nobody matches that.</div>
+                </NoItemsTemplate>
+            </MudAutocomplete>
+        }
+
+            </MudTabPanel>
+
+            <MudTabPanel Text="@ScreenshotTabLabel" Icon="@Icons.Material.Outlined.Image">
+
+        <label class="app-field__label">Upload Reference Screenshot</label>
+
+        @if (_uploadError is not null)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-2" role="alert">
+                @_uploadError
+            </MudAlert>
+        }
+
+        @if (_pickedFile is not null)
+        {
+            <div class="app-stepdialog__picked">
+                <MudIcon Icon="@Icons.Material.Outlined.Image" />
+                <span class="app-stepdialog__pickedname">@_pickedFile.Name</span>
+                <span class="app-stepdialog__pickedsize">@FormatSize(_pickedFile.Size)</span>
+                <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                               Size="Size.Small"
+                               aria-label="@($"Remove {_pickedFile.Name}")"
+                               OnClick="ClearFile" />
+            </div>
+        }
+        else
+        {
+            @* CustomContent is MudBlazor 9's name for the activator slot; its
+               context is the upload component, so the whole panel opens the
+               picker and doubles as the drop target. *@
+            <MudFileUpload T="IBrowserFile"
+                           FilesChanged="OnFilePickedAsync"
+                           Accept="@AcceptedTypes"
+                           MaximumFileCount="1"
+                           MaxFileSize="@FileUploadValidator.MaxSizeBytes"
+                           Class="app-stepdialog__upload"
+                           Context="upload">
+                <CustomContent>
+                    <div class="app-stepdialog__drop"
+                         role="button"
+                         tabindex="0"
+                         aria-label="Upload a reference screenshot"
+                         @onclick="@(() => upload.OpenFilePickerAsync())">
+                        <MudIcon Icon="@Icons.Material.Outlined.CloudUpload" Size="Size.Large" />
+                        <MudText Typo="Typo.body2"><b>Drag &amp; drop an image here</b></MudText>
+                        <MudText Typo="Typo.caption">PNG, JPG or WEBP up to 5MB</MudText>
+                    </div>
+                </CustomContent>
+            </MudFileUpload>
+        }
+
+        @if (_existingImages.Count > 0)
+        {
+            <div class="app-stepdialog__existing">
+                <MudText Typo="Typo.caption">Already attached</MudText>
+
+                @foreach (var image in _existingImages)
+                {
+                    <div class="app-stepdialog__picked">
+                        <MudIcon Icon="@Icons.Material.Outlined.Image" />
+                        <span class="app-stepdialog__pickedname">@image.FileName</span>
+                        <span class="app-stepdialog__pickedsize">@FormatSize(image.SizeBytes)</span>
+                    </div>
+                }
+            </div>
+        }
+
+            </MudTabPanel>
+        </MudTabs>
+    </DialogContent>
+
+    <DialogActions>
+        @if (!IsNew)
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Error"
+                       OnClick="DeleteAsync"
+                       Disabled="_saving">
+                Delete Step
+            </MudButton>
+        }
+
+        <MudSpacer />
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   OnClick="Cancel"
+                   Disabled="_saving"
+                   Class="mr-2">
+            Cancel
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Secondary"
+                   OnClick="SaveAsync"
+                   Disabled="@(!CanSave)">
+            @if (_saving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <span>Saving...</span>
+            }
+            else
+            {
+                <span>Save Step</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

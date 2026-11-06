@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- For SignInManager - see the note in TeamPortal.Infrastructure.csproj. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+
+    <!--
+      Sqlite, not the EF Core InMemory provider - see the ban in
+      Directory.Packages.props. The contract tests run against a real relational
+      database so a difference between the mock and EF Core shows up here rather
+      than in SIT.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Both halves of the seam. Every contract test in this project runs twice -
+      once against the Part A mock, once against EF Core - so the two can never
+      drift apart without a red test.
+    -->
+    <ProjectReference Include="..\..\src\TeamPortal.Mock\TeamPortal.Mock.csproj" />
+    <ProjectReference Include="..\..\src\TeamPortal.Infrastructure\TeamPortal.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="AwesomeAssertions" />
+  </ItemGroup>
+
+</Project>

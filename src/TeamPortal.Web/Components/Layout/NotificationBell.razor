@@ -1,0 +1,49 @@
+@* The bell in the app bar. Phase A11 fills in the dropdown; A3 wires the badge
+   so the count is real from the start. *@
+
+<MudMenu AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight"
+         Dense="true"
+         Class="app-bell">
+    <ActivatorContent>
+        <MudBadge Content="_unreadCount"
+                  Visible="_unreadCount > 0"
+                  Color="Color.Secondary"
+                  Overlap="true"
+                  Bordered="true">
+            <MudIconButton Icon="@Icons.Material.Outlined.Notifications"
+                           Color="Color.Inherit"
+                           aria-label="@BellLabel" />
+        </MudBadge>
+    </ActivatorContent>
+
+    <ChildContent>
+        @if (_notifications.Count == 0)
+        {
+            <MudMenuItem Disabled="true">Nothing new</MudMenuItem>
+        }
+        else
+        {
+            @foreach (var n in _notifications)
+            {
+                <MudMenuItem OnClick="@(() => MarkReadAsync(n.Id))">
+                    <div class="app-bell__item">
+                        <MudText Typo="Typo.body2">
+                            <b>@n.Title</b>
+                        </MudText>
+                        @if (!string.IsNullOrWhiteSpace(n.Message))
+                        {
+                            <MudText Typo="Typo.caption">@n.Message</MudText>
+                        }
+                    </div>
+                </MudMenuItem>
+            }
+
+            @if (_unreadCount > 0)
+            {
+                <MudDivider />
+                <MudMenuItem OnClick="MarkAllReadAsync">Mark all as read</MudMenuItem>
+            }
+        }
+    </ChildContent>
+</MudMenu>

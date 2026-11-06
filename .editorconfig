@@ -1,0 +1,193 @@
+# ******************************************************************************
+# Purpose : Formatting and code style rules enforced by `dotnet format`.
+#           CI gate 3 runs `dotnet format --verify-no-changes` against these.
+# Ticket  : SD-PENDING
+# ******************************************************************************
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,csproj,props,targets,razor,html,css,js}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{cs,razor}]
+indent_size = 4
+
+# --- Language conventions -----------------------------------------------------
+
+# this. is noise; the compiler already knows.
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+dotnet_style_predefined_type_for_locals_parameters_members = true:warning
+dotnet_style_predefined_type_for_member_access = true:warning
+
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_readonly_field = true:warning
+
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
+
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_namespace_declarations = file_scoped:warning
+
+csharp_prefer_braces = true:warning
+csharp_using_directive_placement = outside_namespace:warning
+csharp_style_prefer_primary_constructors = false:suggestion
+
+# --- Formatting ---------------------------------------------------------------
+
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_between_query_expression_clauses = true
+
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = one_less_than_current
+
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# --- Naming: Frontend/TeamConventions.md --------------------------------------
+
+# PascalCase for types and public members.
+dotnet_naming_rule.types_are_pascal_case.severity = warning
+dotnet_naming_rule.types_are_pascal_case.symbols = type_symbols
+dotnet_naming_rule.types_are_pascal_case.style = pascal_case
+dotnet_naming_symbols.type_symbols.applicable_kinds = class,struct,interface,enum,delegate
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_rule.public_members_are_pascal_case.severity = warning
+dotnet_naming_rule.public_members_are_pascal_case.symbols = public_members
+dotnet_naming_rule.public_members_are_pascal_case.style = pascal_case
+dotnet_naming_symbols.public_members.applicable_kinds = property,method,event
+dotnet_naming_symbols.public_members.applicable_accessibilities = public,protected,internal
+
+# Interfaces start with I.
+dotnet_naming_rule.interfaces_start_with_i.severity = warning
+dotnet_naming_rule.interfaces_start_with_i.symbols = interface_symbols
+dotnet_naming_rule.interfaces_start_with_i.style = i_prefix
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_style.i_prefix.required_prefix = I
+dotnet_naming_style.i_prefix.capitalization = pascal_case
+
+# Private instance fields are _camelCase.
+dotnet_naming_rule.private_fields_are_underscore_camel.severity = warning
+dotnet_naming_rule.private_fields_are_underscore_camel.symbols = private_fields
+dotnet_naming_rule.private_fields_are_underscore_camel.style = underscore_camel
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+
+# Private static readonly fields are PascalCase. They are constants in all but
+# name - the only reason they are not `const` is that arrays and objects cannot
+# be. Giving them an underscore would misread them as mutable instance state.
+# This rule is declared after the one above, so it wins for static fields.
+dotnet_naming_rule.private_static_readonly_are_pascal.severity = warning
+dotnet_naming_rule.private_static_readonly_are_pascal.symbols = private_static_readonly
+dotnet_naming_rule.private_static_readonly_are_pascal.style = pascal_case
+dotnet_naming_symbols.private_static_readonly.applicable_kinds = field
+dotnet_naming_symbols.private_static_readonly.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_readonly.required_modifiers = static,readonly
+
+# Constants are PascalCase at every accessibility, for the same reason.
+dotnet_naming_rule.constants_are_pascal_case.severity = warning
+dotnet_naming_rule.constants_are_pascal_case.symbols = constant_fields
+dotnet_naming_rule.constants_are_pascal_case.style = pascal_case
+dotnet_naming_symbols.constant_fields.applicable_kinds = field
+dotnet_naming_symbols.constant_fields.applicable_accessibilities = *
+dotnet_naming_symbols.constant_fields.required_modifiers = const
+
+# Locals and parameters are camelCase.
+dotnet_naming_rule.locals_are_camel_case.severity = warning
+dotnet_naming_rule.locals_are_camel_case.symbols = locals_and_params
+dotnet_naming_rule.locals_are_camel_case.style = camel_case
+dotnet_naming_symbols.locals_and_params.applicable_kinds = local,parameter
+dotnet_naming_style.camel_case.capitalization = camel_case
+
+# --- Analyzer severities ------------------------------------------------------
+
+# TreatWarningsAsErrors is on, so anything raised to warning blocks the build.
+dotnet_diagnostic.CA2007.severity = none      # ConfigureAwait: not wanted in Blazor
+dotnet_diagnostic.CA1848.severity = none      # LoggerMessage delegates: overkill here
+dotnet_diagnostic.CA1515.severity = none      # internal-by-default: types are consumed cross-project
+
+# CA1000 forbids static members on generic types. That rule predates the Result
+# pattern and would outlaw Result<T>.Success(value) / PagedResult<T>.Empty(size),
+# which are the clearest way to build these. Suppressed deliberately.
+dotnet_diagnostic.CA1000.severity = none
+
+# CA1716 flags identifiers that collide with a reserved word in ANOTHER .NET
+# language - it exists for library authors whose types might be consumed from
+# Visual Basic. This is a Blazor application, not a published library, and the
+# rule would rename the conventional Components/Shared folder. Suppressed.
+dotnet_diagnostic.CA1716.severity = none
+
+[tests/**/*.cs]
+# Test method names are deliberately long and underscore-separated:
+# MethodName_Scenario_ExpectedResult
+dotnet_naming_rule.public_members_are_pascal_case.severity = none
+dotnet_diagnostic.CA1707.severity = none      # underscores in member names
+
+# --- EF Core query expressions ------------------------------------------------
+# CA1862 tells you to use string.Equals(..., StringComparison) instead of
+# comparing ToUpper() values. That is right for in-memory C# and wrong here: a
+# StringComparison overload has no SQL translation, so EF Core throws at runtime
+# rather than compiling the comparison into the query. UPPER() is what both SQL
+# Server and Sqlite understand, and it is what keeps the mock and the database
+# agreeing about case. Scoped to the EF service folder so the rule still applies
+# everywhere it makes sense.
+[src/TeamPortal.Infrastructure/Services/*.cs]
+dotnet_diagnostic.CA1862.severity = none
+
+# CA1304 and CA1311 want ToUpper(CultureInfo) instead of ToUpper(). Same problem:
+# EF Core translates the no-argument ToUpper() to the database's UPPER() and has
+# no translation for the CultureInfo overload, so taking the advice trades a
+# warning for a runtime "could not be translated" exception. The database's own
+# collation decides the casing here, not the process culture.
+dotnet_diagnostic.CA1304.severity = none
+dotnet_diagnostic.CA1311.severity = none
+
+# --- EF Core migrations -------------------------------------------------------
+# Machine-generated by `dotnet ef migrations add`. Held to the compiler's rules,
+# not to ours - hand-editing them to satisfy a style analyzer would be undone by
+# the next scaffold, and the file is not read as prose anyway.
+[**/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1825.severity = none
+dotnet_diagnostic.IDE0300.severity = none
+dotnet_diagnostic.IDE0301.severity = none

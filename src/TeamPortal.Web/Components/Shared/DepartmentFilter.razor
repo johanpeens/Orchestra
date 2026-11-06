@@ -1,0 +1,37 @@
+@* The middle column on the Team screen: one row per department with its live
+   count, plus an "All" row. The pencil is only rendered when a handler is bound,
+   so phase A5 shows no inert buttons and phase A6 lights them up. *@
+
+<nav class="app-deptfilter" aria-label="Filter by department">
+    <button type="button"
+            class="@RowClass(null)"
+            aria-pressed="@Pressed(null)"
+            @onclick="@(() => SelectAsync(null))">
+        <span class="app-deptfilter__label">All</span>
+        <span class="app-deptfilter__count">(@TotalCount)</span>
+    </button>
+
+    @foreach (var department in Departments)
+    {
+        var id = department.Id;
+
+        <div class="app-deptfilter__line">
+            <button type="button"
+                    class="@RowClass(id)"
+                    aria-pressed="@Pressed(id)"
+                    @onclick="@(() => SelectAsync(id))">
+                <span class="app-deptfilter__label">@department.Name</span>
+                <span class="app-deptfilter__count">(@department.EmployeeCount)</span>
+            </button>
+
+            @if (OnEdit.HasDelegate)
+            {
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                               Size="Size.Small"
+                               Class="app-deptfilter__edit"
+                               aria-label="@($"Edit {department.Name}")"
+                               OnClick="@(() => OnEdit.InvokeAsync(id))" />
+            }
+        </div>
+    }
+</nav>

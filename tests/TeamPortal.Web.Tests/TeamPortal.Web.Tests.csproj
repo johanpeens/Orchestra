@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="bunit" />
+    <PackageReference Include="MudBlazor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TeamPortal.Web\TeamPortal.Web.csproj" />
+    <ProjectReference Include="..\..\src\TeamPortal.Mock\TeamPortal.Mock.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="AwesomeAssertions" />
+  </ItemGroup>
+
+</Project>

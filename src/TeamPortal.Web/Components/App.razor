@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+
+    @* Brand Sans is not a web font. The approved fallbacks from
+       Frontend/FontUsage.md are loaded here, in stack order. *@
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Mulish:wght@300;400;600;700&display=swap" />
+
+    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["TeamPortal.Web.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    @* Interactivity is opted into globally. Without a render mode the whole app
+       renders as static SSR: no click handlers, no drawer, no dialogs. This is a
+       Blazor Server app - see Frontend/BuildPlan.md, Ground Rules. *@
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

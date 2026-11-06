@@ -1,0 +1,19 @@
+@* Shown when a list has nothing in it. An empty grid with no explanation reads
+   as a broken page, so every list screen uses this instead. *@
+
+<div class="app-empty-state">
+    <MudIcon Icon="@Icon" Size="Size.Large" Class="app-empty-state__icon" />
+    <MudText Typo="Typo.h6" Class="app-empty-state__title">@Title</MudText>
+
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <MudText Typo="Typo.body2" Class="app-empty-state__description">@Description</MudText>
+    }
+
+    @if (ChildContent is not null)
+    {
+        <div class="app-empty-state__actions">
+            @ChildContent
+        </div>
+    }
+</div>

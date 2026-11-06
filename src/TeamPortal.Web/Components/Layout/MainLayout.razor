@@ -1,0 +1,88 @@
+@inherits LayoutComponentBase
+
+@* MudBlazor providers must sit above everything that uses them, in this order:
+   theme, popover, dialog, snackbar. *@
+<MudThemeProvider Theme="AppTheme.Default" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Color="Color.Primary" Fixed="true" Class="app-bar">
+        @* The designs have no hamburger, and for a while this one only appeared
+           below the drawer breakpoint. That left no way to reclaim the space on
+           a laptop, where the folder rail is the widest thing on screen and is
+           often not what you are looking at. It is always available now. *@
+        @if (HasFolderRail)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.Start"
+                           aria-label="@(_drawerOpen ? "Hide the folder list" : "Show the folder list")"
+                           aria-expanded="@(_drawerOpen ? "true" : "false")"
+                           OnClick="ToggleDrawer" />
+        }
+
+        <AppBrand />
+        <SectionSwitcher />
+
+        <MudSpacer />
+
+        @* Search and the notification bell were in the design but neither had
+           anything behind it - a magnifier that searches nothing and a bell that
+           never rings teach people the app bar is decorative. Removed until
+           there is something for them to do. *@
+        <UserMenu />
+    </MudAppBar>
+
+    @* The sidebar exists only on the process side, where it lists folders.
+       Team and Chat have nothing to put in it, so they take the full width
+       instead of sitting beside an empty rail. *@
+    @if (HasFolderRail)
+    {
+        @* Persistent, not Responsive. A Responsive drawer is forced open above its
+           breakpoint and ignores Open entirely, so the toggle in the app bar did
+           nothing on a desktop - the width stayed at 264px however many times you
+           pressed it. Persistent honours Open at every width, which is the whole
+           point of having a button for it. *@
+        <MudDrawer @bind-Open="_drawerOpen"
+                   Elevation="0"
+                   ClipMode="DrawerClipMode.Always"
+                   Variant="DrawerVariant.Persistent"
+                   Width="264px"
+                   Class="app-drawer">
+            <NavMenu @ref="_navMenu" />
+        </MudDrawer>
+    }
+
+    <MudMainContent Class="app-main">
+        <div class="app-main__container">
+            <ErrorBoundary @ref="_errorBoundary">
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent>
+                    @* One broken component must not take down the whole circuit. *@
+                    <MudAlert Severity="Severity.Error" Class="my-6">
+                        <MudText Typo="Typo.body1">
+                            Something went wrong on this page.
+                        </MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Class="mt-3"
+                                   OnClick="RecoverAsync">
+                            Try again
+                        </MudButton>
+                    </MudAlert>
+                </ErrorContent>
+            </ErrorBoundary>
+        </div>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

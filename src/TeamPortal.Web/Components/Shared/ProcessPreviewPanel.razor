@@ -1,0 +1,60 @@
+@* What a hover shows: the description, and who is involved.
+
+   Its own component rather than markup inside the tooltip, because a tooltip
+   hands its content to MudBlazor's popover service and it never appears in the
+   card's own DOM - which makes it untestable and, more to the point, mixes "what
+   the preview says" with "where the preview is positioned". Those are two
+   different jobs. *@
+
+@if (Detail is null)
+{
+    <div class="app-preview app-preview--loading">Loading...</div>
+}
+else
+{
+    <div class="app-preview">
+        <div class="app-preview__name">@Process.Name</div>
+
+        <div class="app-preview__meta">
+            @Process.StatusName
+            @if (!string.IsNullOrWhiteSpace(Process.DepartmentName))
+            {
+                <text> &middot; @Process.DepartmentName</text>
+            }
+            <text> &middot; @Detail.StepLabel</text>
+        </div>
+
+        <p class="app-preview__description">
+            @(string.IsNullOrWhiteSpace(Process.Description)
+                ? "No description written up yet."
+                : Process.Description)
+        </p>
+
+        @if (Detail.People.Count > 0)
+        {
+            <div class="app-preview__heading">Who is involved</div>
+            <ul class="app-preview__people">
+                @foreach (string person in Detail.People)
+                {
+                    <li>@person</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="app-preview__heading">Nobody assigned yet</div>
+        }
+
+        <div class="app-preview__hint">Double-click to open</div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public ProcessListItemDto Process { get; set; } = null!;
+
+    /// <summary>Null while the preview is still being fetched.</summary>
+    [Parameter]
+    public ProcessPreview? Detail { get; set; }
+}

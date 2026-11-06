@@ -1,0 +1,57 @@
+@* Account menu on the right of the app bar.
+
+   MudMenu's own Icon/AriaLabel are used rather than a custom ActivatorContent.
+   A nested <button> inside ActivatorContent swallows the click and the menu
+   never opens - which is exactly how Sign out ended up unreachable. *@
+
+<MudMenu Icon="@Icons.Material.Filled.AccountCircle"
+         Color="Color.Inherit"
+         AriaLabel="@($"Account menu for {DisplayName}")"
+         AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight"
+         Dense="true">
+
+    <MudMenuItem Disabled="true">
+        <MudText Typo="Typo.body2"><b>@DisplayName</b></MudText>
+        <MudText Typo="Typo.caption">@RoleSummary</MudText>
+    </MudMenuItem>
+
+    <MudDivider />
+
+    @* The approval queue. AuthorizeView as well as the page's own [Authorize] -
+       an entry that 403s when clicked is worse than no entry. *@
+    <AuthorizeView Roles="@AppRoles.Admin">
+        <Authorized>
+            <MudMenuItem Icon="@Icons.Material.Outlined.HowToReg" Href="/admin/registrations">
+                Registrations
+                @if (PendingCount > 0)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Class="ml-2">
+                        @PendingCount
+                    </MudChip>
+                }
+            </MudMenuItem>
+
+            <MudDivider />
+        </Authorized>
+    </AuthorizeView>
+
+    @if (ShowRoleSwitcher)
+    {
+        @* Development only. Removed from Release builds in phase B5. *@
+        <MudMenuItem Disabled="true">
+            <MudText Typo="Typo.caption">View as (dev only)</MudText>
+        </MudMenuItem>
+
+        @foreach (var role in AppRoles.All)
+        {
+            <MudMenuItem OnClick="@(() => SwitchRole(role))">@role</MudMenuItem>
+        }
+
+        <MudDivider />
+    }
+
+    <MudMenuItem Icon="@Icons.Material.Outlined.Logout" OnClick="SignOutAsync">
+        Sign out
+    </MudMenuItem>
+</MudMenu>

@@ -1,0 +1,144 @@
+@* Everything underneath one process card, read-only. Opened by double-clicking
+   the card - the hover preview is a summary of this.
+
+   Read-only on purpose: this is for reading a process you did not write, and a
+   dialog that can be opened by a stray double-click should not be able to change
+   anything. Editing is the pencil, which takes a deliberate click. *@
+
+<MudDialog>
+    <TitleContent>
+        <div class="app-detaildialog__title">
+            <MudText Typo="Typo.h6">@(_process?.Name ?? "Process")</MudText>
+
+            @if (_process is { } process)
+            {
+                <div class="app-detaildialog__meta">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">
+                        @_statusName
+                    </MudChip>
+
+                    @if (!string.IsNullOrWhiteSpace(process.DepartmentName))
+                    {
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">
+                            @process.DepartmentName
+                        </MudChip>
+                    }
+                </div>
+            }
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (_loading)
+        {
+            <LoadingPanel Message="Loading the process..." />
+        }
+        else if (_process is null)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" role="alert">
+                That process is no longer there. It may have been deleted.
+            </MudAlert>
+        }
+        else
+        {
+            <section class="app-detaildialog__section">
+                <div class="app-detaildialog__heading">Description</div>
+                <p class="app-detaildialog__body">
+                    @(string.IsNullOrWhiteSpace(_process.Description)
+                        ? "No description written up yet."
+                        : _process.Description)
+                </p>
+            </section>
+
+            <section class="app-detaildialog__section">
+                <div class="app-detaildialog__heading">
+                    Who is involved (@_people.Count)
+                </div>
+
+                @if (_people.Count == 0)
+                {
+                    <p class="app-detaildialog__body">Nobody is assigned to any step yet.</p>
+                }
+                else
+                {
+                    <div class="app-detaildialog__people">
+                        @foreach (StepOwnerDto person in _people)
+                        {
+                            <div class="app-personoption">
+                                <MudAvatar Size="Size.Small" Color="Color.Primary">
+                                    @if (!string.IsNullOrWhiteSpace(person.PhotoUrl))
+                                    {
+                                        <MudImage Src="@person.PhotoUrl" Alt="" />
+                                    }
+                                    else
+                                    {
+                                        @person.Initials
+                                    }
+                                </MudAvatar>
+
+                                <div class="app-personoption__text">
+                                    <span class="app-personoption__name">@person.FullName</span>
+                                    @if (!string.IsNullOrWhiteSpace(person.JobTitle))
+                                    {
+                                        <span class="app-personoption__role">@person.JobTitle</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+
+            <section class="app-detaildialog__section">
+                <div class="app-detaildialog__heading">
+                    Steps (@_steps.Count)
+                </div>
+
+                @if (_steps.Count == 0)
+                {
+                    <p class="app-detaildialog__body">No steps written up yet.</p>
+                }
+                else
+                {
+                    <ol class="app-detaildialog__steps">
+                        @foreach (ProcessStepDto step in _steps)
+                        {
+                            <li class="app-detaildialog__step">
+                                <div class="app-detaildialog__stepname">
+                                    <span class="app-detaildialog__stepnum">@step.StepNumber</span>
+                                    <span>@step.Name</span>
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">
+                                        @step.StatusName
+                                    </MudChip>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(step.Description))
+                                {
+                                    <p class="app-detaildialog__stepbody">@step.Description</p>
+                                }
+
+                                @if (step.HasOwners)
+                                {
+                                    <div class="app-detaildialog__stepowners">
+                                        @string.Join(", ", step.Owners.Select(o => o.FullName))
+                                    </div>
+                                }
+
+                                @if (step.HasImages)
+                                {
+                                    <img class="app-detaildialog__shot"
+                                         src="@step.Images[0].Url"
+                                         alt="@($"Reference screenshot for {step.Name}")" />
+                                }
+                            </li>
+                        }
+                    </ol>
+                }
+            </section>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>

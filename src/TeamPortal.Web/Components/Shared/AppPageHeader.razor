@@ -1,0 +1,30 @@
+@* The mandatory banner at the top of every feature page.
+   See Frontend/TeamConventions.md - Page Header. All styling lives in the
+   .app-page-header* classes in wwwroot/app.css; do not override it inline.
+
+   docs/design/02 and docs/design/05 both show a title with a description line and NO
+   overline, so Overline is optional and Description was added. Title is still
+   required - a page with no name is always a bug. *@
+
+<div class="app-page-header">
+    <div class="app-page-header__text">
+        @if (!string.IsNullOrWhiteSpace(Overline))
+        {
+            <MudText Typo="Typo.body2" Class="app-page-header__overline">@Overline</MudText>
+        }
+
+        <MudText Typo="Typo.h3" Class="app-page-header__title">@Title</MudText>
+
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <MudText Typo="Typo.body1" Class="app-page-header__description">@Description</MudText>
+        }
+    </div>
+
+    @if (ChildContent is not null)
+    {
+        <div class="app-page-header__actions">
+            @ChildContent
+        </div>
+    }
+</div>

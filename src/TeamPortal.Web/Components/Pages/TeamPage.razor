@@ -1,0 +1,71 @@
+@page "/team"
+@attribute [Authorize]
+
+
+@* Screen 05, read-only. Department filter column on the left of the content
+   area, employee cards on the right. See docs/design/05-team-management-screen.png. *@
+
+<PageTitle>Team - Orchestra</PageTitle>
+
+<AppPageHeader Title="Team"
+               Description="Manage and view members, roles, and business enablement structures.">
+    <MudTextField T="string"
+                  Value="_search"
+                  ValueChanged="OnSearchChangedAsync"
+                  Placeholder="Search name, role or department..."
+                  Variant="Variant.Outlined"
+                  Margin="Margin.Dense"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Outlined.Search"
+                  Immediate="true"
+                  DebounceInterval="300"
+                  Clearable="true"
+                  Class="app-team__search" />
+
+    <MudButton Variant="Variant.Outlined"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Outlined.History"
+               Class="app-team__log"
+               OnClick="ViewActivityAsync">
+        View Activity Log
+    </MudButton>
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.PersonAdd"
+               Class="app-team__add"
+               OnClick="AddEmployeeAsync">
+        Add Employee
+    </MudButton>
+</AppPageHeader>
+
+<div class="app-team">
+    <div class="app-team__filter">
+        <DepartmentFilter Departments="_departments"
+                          SelectedDepartmentId="_selectedDepartmentId"
+                          SelectedDepartmentIdChanged="OnDepartmentSelectedAsync"
+                          OnEdit="EditDepartmentAsync" />
+    </div>
+
+    <div class="app-team__cards">
+        @if (_loading)
+        {
+            <LoadingPanel Message="Loading team..." />
+        }
+        else if (_employees.Count == 0)
+        {
+            <EmptyState Title="@EmptyTitle"
+                        Description="@EmptyDescription"
+                        Icon="@Icons.Material.Outlined.Groups" />
+        }
+        else
+        {
+            <div class="app-team__grid">
+                @foreach (var employee in _employees)
+                {
+                    <EmployeeCard Employee="employee" OnEdit="EditEmployeeAsync" @key="employee.Id" />
+                }
+            </div>
+        }
+    </div>
+</div>

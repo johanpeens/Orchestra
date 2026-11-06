@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    SignInManager lives in the ASP.NET Core shared framework, not in the Identity
+    NuGet package - the package only brings the stores. Sign-in is a web concern
+    by nature (it writes a cookie), so this is the one place the data layer knows
+    about ASP.NET Core. Nothing else in here may use it.
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- The contract tests exercise the internal implementations directly. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="TeamPortal.Services.Tests" />
+    <InternalsVisibleTo Include="TeamPortal.Infrastructure.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="MailKit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TeamPortal.Domain\TeamPortal.Domain.csproj" />
+    <ProjectReference Include="..\TeamPortal.Application\TeamPortal.Application.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Portal - EF Core Structure</title>
+<style>
+  :root {
+    --ink:      #222227;
+    --muted:    #4C4A4F;
+    --line:     #D5CBDD;
+    --purple:   #4A2767;
+    --orange:   #E55218;
+    --aqua:     #44B4A6;
+    --gold:     #9A8445;
+    --paper:    #FFFFFF;
+    --wash:     #F7F5F9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.5rem 5rem;
+    background: var(--wash);
+    color: var(--ink);
+    font-family: "Brand Sans", Quicksand, Mulish, "Be Vietnam Pro", sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+  .overline {
+    color: var(--aqua); font-size: .8125rem; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; margin: 0 0 .35rem;
+  }
+  h1 { color: var(--purple); font-size: 2rem; font-weight: 700; margin: 0 0 .5rem; }
+  h2 {
+    color: var(--purple); font-size: 1.25rem; font-weight: 700;
+    margin: 3rem 0 .5rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line);
+  }
+  p.lede { color: var(--muted); margin: 0; max-width: 68ch; }
+  p.note { color: var(--muted); font-size: .9375rem; margin: .25rem 0 1.25rem; max-width: 78ch; }
+  .panel {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.25rem; overflow-x: auto;
+  }
+  .mermaid { min-width: 720px; }
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+  .legend li {
+    display: flex; align-items: center; gap: .45rem;
+    font-size: .875rem; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: .3rem .8rem; background: var(--paper);
+  }
+  .dot { width: .7rem; height: .7rem; border-radius: 50%; flex: none; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: .9375rem; }
+  th, td { text-align: left; padding: .55rem .75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--purple); color: #fff; font-weight: 600; }
+  th:first-child { border-top-left-radius: 8px; }
+  th:last-child  { border-top-right-radius: 8px; }
+  tbody tr:nth-child(even) { background: var(--wash); }
+  code {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: .875em; background: var(--wash);
+    border: 1px solid var(--line); border-radius: 4px; padding: .05rem .3rem;
+  }
+  footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line);
+           color: var(--muted); font-size: .875rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="overline">Team Portal</p>
+    <h1>EF Core Database Structure</h1>
+    <p class="lede">
+      Every table the app needs, and how they join up. The C# classes behind these
+      boxes are written out in full in <code>Doc/DataModel.md</code>.
+    </p>
+  </header>
+
+  <h2>1. How to read this</h2>
+  <p class="note">
+    Each box is one table. <code>PK</code> is the primary key (the row's unique number).
+    <code>FK</code> is a foreign key (a pointer to a row in another table).
+    The crow's foot &mdash; the three-pronged end of a line &mdash; always sits on the
+    "many" side. So <em>one</em> Process has <em>many</em> Process Steps.
+  </p>
+  <ul class="legend">
+    <li><span class="dot" style="background:#4A2767"></span> Login &amp; security (Identity)</li>
+    <li><span class="dot" style="background:#E55218"></span> People &amp; org structure</li>
+    <li><span class="dot" style="background:#44B4A6"></span> Processes &amp; steps</li>
+    <li><span class="dot" style="background:#9A8445"></span> History &amp; alerts</li>
+  </ul>
+
+  <h2>2. The whole database</h2>
+  <p class="note">
+    All 15 tables in one picture. If this feels busy, skip to section 3 &mdash; the same
+    thing broken into three smaller diagrams.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+erDiagram
+    AppUser ||--o{ AppUserRole : "has"
+    AppRole ||--o{ AppUserRole : "granted to"
+    AppUser ||--o{ AppUserClaim : "has"
+    AppRole ||--o{ AppRoleClaim : "has"
+    AppUser ||--o{ AppUserLogin : "has"
+    AppUser ||--o{ AppUserToken : "has"
+    AppUser |o--o| Employee : "is"
+
+    Department    ||--o{ Employee    : "contains"
+    Department    ||--o{ ProcessStep : "tags"
+
+    ProcessFolder ||--o{ Process     : "holds in order"
+    Process       ||--o{ ProcessStep : "is made of"
+    StepStatus    ||--o{ ProcessStep : "describes"
+    StepStatus    ||--o{ Process     : "describes"
+    Department    ||--o{ Process     : "tags"
+
+    ProcessStep   ||--o{ StepOwner   : "assigned via"
+    Employee      ||--o{ StepOwner   : "responsible via"
+    ProcessStep   ||--o{ StepImage   : "shows"
+    AppUser       |o--o{ StepImage   : "uploaded"
+
+    AppUser       |o--o{ ActivityLog  : "did"
+    AppUser       ||--o{ Notification : "receives"
+
+    AppUser {
+        int Id PK
+        string UserName
+        string Email
+        string PasswordHash
+        string FullName
+        string PhotoUrl
+        bool IsActive
+        DateTime LastLoginAt
+        int EmployeeId FK
+    }
+    AppRole {
+        int Id PK
+        string Name
+        string Description
+    }
+    AppUserRole {
+        int UserId "PK,FK"
+        int RoleId "PK,FK"
+    }
+    AppUserClaim {
+        int Id PK
+        int UserId FK
+        string ClaimType
+        string ClaimValue
+    }
+    AppRoleClaim {
+        int Id PK
+        int RoleId FK
+        string ClaimType
+        string ClaimValue
+    }
+    AppUserLogin {
+        string LoginProvider PK
+        string ProviderKey PK
+        int UserId FK
+    }
+    AppUserToken {
+        int UserId "PK,FK"
+        string LoginProvider PK
+        string Name PK
+        string Value
+    }
+
+    Department {
+        int Id PK
+        string Name UK
+        string ColourHex
+        int SortOrder
+        bool IsDeleted
+    }
+    Employee {
+        int Id PK
+        string FullName
+        string JobTitle
+        string Email UK
+        string PhotoUrl
+        int StaffType
+        int DepartmentId FK
+        bool IsActive
+        bool IsDeleted
+    }
+
+    ProcessFolder {
+        int Id PK
+        string Name UK
+        int SortOrder
+        bool IsDeleted
+    }
+    Process {
+        int Id PK
+        string Name
+        string Description
+        int ProcessFolderId FK
+        int DepartmentId FK
+        int StepStatusId FK
+        int SortOrder
+        bool IsArchived
+        bool IsDeleted
+    }
+    ProcessStep {
+        int Id PK
+        int ProcessId FK
+        int StepNumber
+        string Name
+        string Description
+        int DepartmentId FK
+        int StepStatusId FK
+        bool IsDeleted
+    }
+    StepStatus {
+        int Id PK
+        string Name UK
+        string ColourHex
+        int SortOrder
+        bool IsDefault
+    }
+    StepOwner {
+        int ProcessStepId "PK,FK"
+        int EmployeeId "PK,FK"
+        DateTime AssignedAt
+        bool IsPrimary
+    }
+    StepImage {
+        int Id PK
+        int ProcessStepId FK
+        string FileName
+        string StoredPath
+        string ContentType
+        long SizeBytes
+        int SortOrder
+        DateTime UploadedAt
+        int UploadedByUserId FK
+    }
+
+    ActivityLog {
+        long Id PK
+        int UserId FK
+        int Action
+        string EntityName
+        int EntityId
+        string Summary
+        DateTime HappenedAt
+    }
+    Notification {
+        int Id PK
+        int UserId FK
+        string Title
+        string Message
+        string LinkUrl
+        bool IsRead
+        DateTime CreatedAt
+    }
+    </pre>
+  </div>
+
+  <h2>3. The same thing, in three bites</h2>
+
+  <h3>3a. Who can log in</h3>
+  <p class="note">
+    The seven tables ASP.NET Core Identity gives us. We only ever write our own code
+    against <code>AppUser</code> and <code>AppRole</code>; the rest are managed by
+    <code>UserManager</code> and <code>SignInManager</code>.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+erDiagram
+    AppUser ||--o{ AppUserRole  : "has"
+    AppRole ||--o{ AppUserRole  : "granted to"
+    AppUser ||--o{ AppUserClaim : "has"
+    AppRole ||--o{ AppRoleClaim : "has"
+    AppUser ||--o{ AppUserLogin : "signs in with"
+    AppUser ||--o{ AppUserToken : "holds"
+    AppUser |o--o| Employee     : "is"
+
+    AppUser {
+        int Id PK
+        string Email
+        string PasswordHash
+        string FullName
+        bool IsActive
+        int EmployeeId FK
+    }
+    AppRole      { int Id PK  string Name }
+    AppUserRole  { int UserId "PK,FK"  int RoleId "PK,FK" }
+    AppUserClaim { int Id PK  int UserId FK }
+    AppRoleClaim { int Id PK  int RoleId FK }
+    AppUserLogin { string ProviderKey PK  int UserId FK }
+    AppUserToken { int UserId "PK,FK"  string Name PK }
+    Employee     { int Id PK  string FullName }
+    </pre>
+  </div>
+
+  <h3>3b. Who works here</h3>
+  <div class="panel">
+    <pre class="mermaid">
+erDiagram
+    Department   ||--o{ Employee   : "contains"
+
+    Department {
+        int Id PK
+        string Name UK
+        string ColourHex
+        int SortOrder
+    }
+    Employee {
+        int Id PK
+        string FullName
+        string JobTitle
+        string PhotoUrl
+        int StaffType
+        int DepartmentId FK
+        bool IsActive
+    }
+    </pre>
+  </div>
+
+  <h3>3c. How work gets done</h3>
+  <p class="note">
+    Three levels, and the order matters at each one. A <strong>folder</strong> holds
+    <strong>processes</strong> in sequence &mdash; those are the cards in the flow strip.
+    Each process holds <strong>steps</strong> in sequence &mdash; the numbered list
+    underneath. Back and Next walk the steps and cross from one process into the next,
+    so a whole folder reads end to end.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+erDiagram
+    ProcessFolder ||--o{ Process     : "holds in order"
+    Department    ||--o{ Process     : "tags"
+    Process       ||--o{ ProcessStep : "is made of"
+    StepStatus    ||--o{ ProcessStep : "describes"
+    StepStatus    ||--o{ Process     : "describes"
+    Department    ||--o{ ProcessStep : "tags"
+    ProcessStep   ||--o{ StepOwner   : "assigned via"
+    Employee      ||--o{ StepOwner   : "responsible via"
+    ProcessStep   ||--o{ StepImage   : "shows"
+
+    ProcessFolder { int Id PK  string Name UK  int SortOrder }
+    Department    { int Id PK  string Name UK  string ColourHex }
+    Employee      { int Id PK  string FullName  int DepartmentId FK }
+    Process {
+        int Id PK
+        string Name
+        string Description
+        int ProcessFolderId FK
+        int DepartmentId FK
+        int StepStatusId FK
+        int SortOrder
+        bool IsArchived
+    }
+    ProcessStep {
+        int Id PK
+        int ProcessId FK
+        int StepNumber
+        string Name
+        string Description
+        int DepartmentId FK
+        int StepStatusId FK
+    }
+    StepStatus  { int Id PK  string Name UK  string ColourHex  bool IsDefault }
+    StepOwner   { int ProcessStepId "PK,FK"  int EmployeeId "PK,FK"  bool IsPrimary }
+    StepImage   { int Id PK  int ProcessStepId FK  string StoredPath  long SizeBytes }
+    </pre>
+  </div>
+
+  <h2>4. Delete rules</h2>
+  <p class="note">
+    What EF Core does to the children when a parent row goes away. Getting this wrong is
+    the classic way to lose a week of data with one click, so the default answer is
+    <code>Restrict</code> &mdash; refuse the delete until the children are dealt with.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Parent</th><th>Child</th><th>On delete</th><th>Why</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>Process</code></td><td><code>ProcessStep</code></td><td><code>Cascade</code></td><td>A step has no meaning without its process</td></tr>
+      <tr><td><code>ProcessStep</code></td><td><code>StepOwner</code></td><td><code>Cascade</code></td><td>The assignment dies with the step</td></tr>
+      <tr><td><code>ProcessStep</code></td><td><code>StepImage</code></td><td><code>Cascade</code></td><td>Same</td></tr>
+      <tr><td><code>AppUser</code></td><td><code>Notification</code></td><td><code>Cascade</code></td><td>Nobody else can read them</td></tr>
+      <tr><td><code>AppUser</code></td><td><code>ActivityLog</code></td><td><code>SetNull</code></td><td>Keep the history, forget who</td></tr>
+      <tr><td><code>Department</code></td><td><code>Employee</code></td><td><code>Restrict</code></td><td>Move the staff first</td></tr>
+      <tr><td><code>Employee</code></td><td><code>StepOwner</code></td><td><code>Restrict</code></td><td>Unassign the person first</td></tr>
+      <tr><td><code>Department</code></td><td><code>Process</code></td><td><code>Restrict</code></td><td>The flow-strip tag - untag before deleting</td></tr>
+      <tr><td><code>ProcessFolder</code></td><td><code>Process</code></td><td><code>Restrict</code></td><td>Empty the folder first</td></tr>
+      <tr><td><code>StepStatus</code></td><td><code>Process</code></td><td><code>Restrict</code></td><td>Lookup rows are never deleted</td></tr>
+      <tr><td><code>StepStatus</code></td><td><code>ProcessStep</code></td><td><code>Restrict</code></td><td>Lookup rows are never deleted</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. Soft delete</h2>
+  <p class="note">
+    Business tables carry an <code>IsDeleted</code> flag. "Deleting" a row sets the flag
+    to <code>true</code> and a global query filter hides it from every query. Nothing is
+    physically removed, so a mistaken delete is one <code>UPDATE</code> away from being
+    undone. The link tables (<code>StepOwner</code>) and the append-only tables
+    (<code>ActivityLog</code>) are exceptions &mdash; they are deleted for real, or never
+    deleted at all.
+  </p>
+
+  <footer>
+    Team Portal &middot; EF Core structure &middot; companion to
+    <code>Doc/DataModel.md</code> and <code>Doc/UserFlow.html</code>
+  </footer>
+
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    er: { useMaxWidth: true, entityPadding: 12, fontSize: 13 },
+    themeVariables: {
+      fontFamily: '"Brand Sans", Quicksand, Mulish, sans-serif',
+      primaryColor:       "#F1ECF5",
+      primaryTextColor:   "#222227",
+      primaryBorderColor: "#4A2767",
+      lineColor:          "#896D98",
+      tertiaryColor:      "#FFFFFF"
+    }
+  });
+</script>
+</body>
+</html>

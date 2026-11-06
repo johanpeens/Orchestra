@@ -1,0 +1,2464 @@
+/* *****************************************************************************
+   Purpose : App-wide CSS. Shared rules live here ONCE - never per page.
+             Colours come from MudBlazor's theme variables, which are generated
+             from BrandPalette. No hex literals in this file: CI gate 5 fails on
+             one, and a hard-coded colour cannot follow a theme change.
+             See Frontend/TeamConventions.md.
+   Ticket  : SD-PENDING
+   *****************************************************************************
+   Date            By                      Action
+   *****************************************************************************
+   23 Aug 2026     Orchestra Team          Created
+   ***************************************************************************** */
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+/* --- App bar -----------------------------------------------------------------
+   Brand tile + wordmark on the left, then the section pill. Matches the top of
+   every screen in Design/. */
+
+.app-bar {
+    height: 72px;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-right: 1rem;
+}
+
+.app-brand__tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+    flex: none;
+}
+
+/* The section pills beside the brand. */
+.app-sections {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.app-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    text-decoration: none;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    opacity: 0.75;
+}
+
+.app-pill:hover {
+    background: rgba(255, 255, 255, 0.2);
+    opacity: 1;
+}
+
+.app-pill--active {
+    background: rgba(255, 255, 255, 0.16);
+    opacity: 1;
+}
+
+.app-pill:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.7);
+    outline-offset: 2px;
+}
+
+.app-main__container {
+    padding: 2rem 2.5rem 3rem;
+
+    /* Tall enough to fill the screen, and a column, so a page with a footer can
+       push it down with margin-top:auto. Without this a short page left its
+       footer floating in the middle of the screen, riding up and down with
+       however much content happened to be there. */
+    min-height: calc(100vh - var(--mud-appbar-height, 64px));
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Sidebar -----------------------------------------------------------------
+   Heading and action on one row, scrolling body, footer button pinned to the
+   bottom. Same skeleton on both the process side and the team side. */
+
+.app-drawer {
+    border-right: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.25rem 0.75rem 1rem;
+}
+
+.app-sidebar__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0 0.25rem 1rem;
+}
+
+.app-sidebar__heading {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-sidebar__action {
+    border-radius: 999px;
+    text-transform: none;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    padding: 0.2rem 0.7rem;
+}
+
+.app-sidebar__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.app-sidebar__row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--mud-palette-text-primary);
+    font-size: 0.9375rem;
+}
+
+.app-sidebar__row:hover {
+    background: var(--mud-palette-action-default-hover);
+}
+
+.app-sidebar__row--selected {
+    background: var(--mud-palette-primary-hover);
+    font-weight: 600;
+}
+
+.app-sidebar__icon {
+    color: var(--mud-palette-text-secondary);
+    flex: none;
+}
+
+.app-sidebar__row--selected .app-sidebar__icon {
+    color: var(--mud-palette-primary);
+}
+
+.app-sidebar__label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-sidebar__count {
+    flex: none;
+    min-width: 1.5rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--mud-palette-action-default-hover);
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.app-sidebar__foot {
+    flex: none;
+    padding-top: 0.75rem;
+}
+
+.app-sidebar__footbutton {
+    border-radius: 10px;
+    text-transform: none;
+    font-size: 0.875rem;
+    justify-content: flex-start;
+}
+
+/* --- Page header (AppPageHeader) --------------------------------------------
+   The mandatory banner on every feature page. Do not override these values
+   inline; change them here so every page moves together. */
+
+.app-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-page-header__overline {
+    color: var(--mud-palette-success);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.15rem;
+}
+
+.app-page-header__title {
+    color: var(--mud-palette-primary);
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.app-page-header__description {
+    color: var(--mud-palette-text-secondary);
+    margin-top: 0.4rem;
+    max-width: 70ch;
+}
+
+.app-page-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* --- Data grid header -------------------------------------------------------
+   Applied via HeaderClass="app-grid-header" on every MudDataGrid. */
+
+.app-grid-header {
+    background-color: var(--mud-palette-primary) !important;
+    color: var(--mud-palette-primary-text) !important;
+}
+
+.app-grid-header .mud-table-cell,
+.app-grid-header .mud-table-sort-label,
+.app-grid-header .mud-table-sort-label:hover,
+.app-grid-header .mud-table-sort-label-icon {
+    color: var(--mud-palette-primary-text) !important;
+    font-weight: 600;
+}
+
+/* --- Dialogs ----------------------------------------------------------------
+   Applied via Class="app-dialog" on every MudDialog. */
+
+.app-dialog .mud-dialog-title {
+    background-color: var(--mud-palette-primary-hover);
+    padding: 0.75rem 1.5rem;
+}
+
+.app-dialog .mud-dialog-title .mud-typography {
+    color: var(--mud-palette-primary);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    text-align: left;
+}
+
+.app-dialog .mud-dialog-actions {
+    padding: 1rem 1.5rem;
+}
+
+/* --- Form inputs -------------------------------------------------------------
+   Rounded-pill outline on every outlined input, defined once. Do not override
+   per field, and do not switch to Variant.Text or Variant.Filled without a
+   documented design reason. */
+
+.mud-input-outlined-border {
+    border-radius: 999px;
+}
+
+.mud-input-outlined .mud-input-slot {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* --- Loading and empty states ------------------------------------------------ */
+
+.app-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 3rem 1rem;
+}
+
+.app-loading__text {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 4rem 1rem;
+    text-align: center;
+}
+
+.app-empty-state__icon {
+    color: var(--mud-palette-text-disabled);
+}
+
+.app-empty-state__title {
+    color: var(--mud-palette-text-primary);
+}
+
+.app-empty-state__description {
+    color: var(--mud-palette-text-secondary);
+    max-width: 42ch;
+}
+
+.app-empty-state__actions {
+    margin-top: 1rem;
+}
+
+/* --- Process dashboard (screen 02) --------------------------------------------
+   Flow strip across the top, then step list / detail / description.
+   See Design/02-process-dashboard.png. */
+
+.app-process__add,
+.app-process__upload {
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+/* No border, no background, barely any padding. It was a bordered box sitting
+   inside the page's own bordered content area - two frames around one row of
+   cards, and the strip is the widest thing on the screen so the wasted space
+   was doubled. The heading and the cards are enough to say where it starts. */
+.app-flowstrip {
+    padding: 0;
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.app-flowstrip__heading {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+    margin-bottom: 0.85rem;
+}
+
+.app-flowstrip__rail {
+    display: flex;
+    gap: 0.85rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+}
+
+/* --- Step card ------------------------------------------------------------------ */
+
+.app-stepcard {
+    flex: 0 0 auto;
+    width: 158px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.85rem 0.95rem 1rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 12px;
+    background: var(--mud-palette-surface);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.app-stepcard:hover {
+    border-color: var(--mud-palette-primary);
+}
+
+.app-stepcard--selected {
+    border-color: var(--mud-palette-primary);
+    border-width: 2px;
+    background: var(--mud-palette-primary-hover);
+}
+
+.app-stepcard:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.app-stepcard__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-stepcard__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+
+    /* The business unit's own colour, set on the card as --tag-colour. It used
+       to be the theme primary on every card, so the coloured tag underneath
+       looked decorative rather than meaningful. */
+    background: var(--tag-colour, var(--mud-palette-primary));
+    color: var(--mud-palette-primary-text);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.app-stepcard__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+}
+
+.app-stepcard__name {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+}
+
+/* --- Flow-strip legend --------------------------------------------------------
+   Sits in the page header's action row, ahead of the icon buttons, and only
+   while the strip is open. It is the key to the cards: each card's number badge
+   is painted its business unit's colour and nothing else on screen says which
+   colour is which. */
+
+.app-flowlegend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+
+    /* Gives way to the buttons before it starts pushing them off the row. */
+    min-width: 0;
+    margin-right: 0.35rem;
+}
+
+.app-flowlegend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--tag-colour);
+    background: color-mix(in srgb, var(--tag-colour) 12%, transparent);
+}
+
+.app-flowlegend__swatch {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--tag-colour);
+}
+
+.app-flowlegend__count {
+    font-weight: 700;
+    opacity: 0.7;
+}
+
+/* --- Three-column body ---------------------------------------------------------- */
+
+.app-process {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr) 300px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.app-process__listheading {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-process__listname {
+    font-weight: 700;
+    margin: 0.4rem 0 0.75rem;
+}
+
+.app-process__row {
+    display: flex;
+    align-items: center;
+    /* Explicit, and not redundant. This is a <button>, and a button's anonymous
+       content box is centred by the user-agent stylesheet - so without this the
+       badge and label sit in the middle of the row and every row starts at a
+       different x, depending on how long its label is. text-align: left below
+       does not fix it, because flex placement decides where the boxes go before
+       text alignment gets a say. */
+    justify-content: flex-start;
+    gap: 0.7rem;
+    width: 100%;
+    /* Left padding is deliberately tiny so the number badges line up with the
+       PROCESS STEPS heading and the Add button above them. */
+    padding: 0.6rem 0.75rem 0.6rem 0.25rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9375rem;
+    text-align: left;
+    cursor: pointer;
+    color: var(--mud-palette-text-primary);
+}
+
+.app-process__row:hover {
+    background: var(--mud-palette-action-default-hover);
+}
+
+.app-process__row--selected {
+    background: var(--mud-palette-primary-hover);
+    font-weight: 600;
+}
+
+.app-process__row:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+.app-process__rownum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--mud-palette-action-default-hover);
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex: none;
+}
+
+.app-process__row--selected .app-process__rownum {
+    background: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+}
+
+.app-process__detail,
+.app-process__side {
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 14px;
+    background: var(--mud-palette-surface);
+    padding: 1.25rem;
+}
+
+.app-process__detailhead {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.app-process__shot {
+    display: block;
+    width: 100%;
+    min-height: 320px;
+    border-radius: 8px;
+    background: var(--mud-palette-action-default-hover);
+    object-fit: contain;
+}
+
+.app-process__shot--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-process__sidehead {
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.app-process__sidebody {
+    color: var(--mud-palette-text-secondary);
+    margin-bottom: 1.25rem;
+}
+
+.app-process__owner {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.75rem;
+}
+
+.app-process__ownerinitials {
+    background: var(--mud-palette-primary-hover);
+    color: var(--mud-palette-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.app-process__ownername {
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.app-process__ownerrole {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+}
+
+/* Pinned to the bottom of the viewport. Back and Next are how you walk the
+   whole flow, and on a long step they were below the fold - you had to scroll
+   down to move on and back up to read. */
+.app-process__nav {
+    display: flex;
+    align-items: center;
+
+    /* Pinned to the bottom of the screen, both ways round: margin-top:auto puts
+       it there when the page is short, sticky keeps it there when the page is
+       long enough to scroll. The negative bottom margin cancels the container's
+       bottom padding so it sits ON the bottom edge rather than 3rem above it. */
+    margin-top: auto;
+    margin-bottom: -3rem;
+
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+
+    padding-top: 1.75rem;
+    padding: 0.75rem 0 0.85rem;
+    border-top: 1px solid var(--mud-palette-lines-default);
+
+    /* Opaque: content scrolls underneath it. */
+    background: var(--mud-palette-background-gray);
+}
+
+@media (max-width: 1279px) {
+    .app-process {
+        grid-template-columns: 210px minmax(0, 1fr);
+    }
+
+    .app-process__side {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 899px) {
+    .app-process {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* --- Team screen (screen 05) --------------------------------------------------
+   Department filter column on the left of the content area, card grid on the
+   right. See Design/05-team-management-screen.png. */
+
+.app-team {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+.app-team__search {
+    width: 320px;
+    max-width: 100%;
+}
+
+.app-team__add,
+.app-team__log {
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.app-team__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 1.25rem;
+}
+
+/* --- Department filter -------------------------------------------------------- */
+
+.app-deptfilter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.app-deptfilter__line {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.app-deptfilter__row {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    font-size: 0.9375rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.app-deptfilter__row:hover {
+    background: var(--mud-palette-action-default-hover);
+}
+
+.app-deptfilter__row:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+.app-deptfilter__row--selected {
+    background: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+    font-weight: 600;
+}
+
+.app-deptfilter__count {
+    color: inherit;
+    opacity: 0.75;
+    font-size: 0.875rem;
+}
+
+.app-deptfilter__edit {
+    flex: none;
+}
+
+/* --- Employee card ------------------------------------------------------------ */
+
+.app-empcard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.5rem 1rem 1.25rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 12px;
+    text-align: center;
+    background: var(--mud-palette-surface);
+}
+
+.app-empcard {
+    position: relative;
+}
+
+.app-empcard__edit {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    opacity: 0.45;
+}
+
+.app-empcard:hover .app-empcard__edit,
+.app-empcard__edit:focus-visible {
+    opacity: 1;
+}
+
+.app-empcard__avatar {
+    margin-bottom: 0.5rem;
+}
+
+.app-empcard__initials {
+    background: var(--mud-palette-primary-hover);
+    color: var(--mud-palette-primary);
+    font-weight: 600;
+}
+
+.app-empcard__name {
+    font-weight: 700;
+    font-size: 1.0625rem;
+}
+
+.app-empcard__role {
+    color: var(--mud-palette-text-primary);
+    font-size: 0.9375rem;
+}
+
+.app-empcard__dept {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+}
+
+.app-empcard__chip {
+    margin-top: 0.6rem;
+}
+
+@media (max-width: 1099px) {
+    .app-team {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* --- Dialog form fields -------------------------------------------------------- */
+
+.app-field__label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 1rem 0 0.35rem;
+}
+
+.app-field__label:first-child {
+    margin-top: 0;
+}
+
+/* --- Edit Department dialog (screen 07) ---------------------------------------- */
+
+.app-deptdialog__namerow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app-deptdialog__preview {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: var(--mud-palette-action-default-hover);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+.app-deptdialog__dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--preview-colour);
+}
+
+.app-deptdialog__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.app-deptdialog__swatch {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mud-palette-primary-text);
+    padding: 0;
+}
+
+.app-deptdialog__swatch--selected {
+    box-shadow: 0 0 0 2px var(--mud-palette-surface), 0 0 0 4px var(--mud-palette-primary);
+}
+
+.app-deptdialog__swatch:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 3px;
+}
+
+/* --- Add Employee dialog (screen 06) ------------------------------------------- */
+
+.app-empdialog {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+}
+
+.app-empdialog__photo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    text-align: center;
+}
+
+.app-empdialog__avatar {
+    width: 6rem;
+    height: 6rem;
+    background: var(--mud-palette-primary-hover);
+    color: var(--mud-palette-primary);
+}
+
+.app-empdialog__upload {
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.app-empdialog__hint {
+    color: var(--mud-palette-text-secondary);
+}
+
+@media (max-width: 699px) {
+    .app-empdialog {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* --- Add / Edit Process dialog (screen 03) -------------------------------------- */
+
+.app-procdialog__units {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 10px;
+    background: var(--mud-palette-action-default-hover);
+}
+
+.app-procdialog__unit {
+    flex: 1 1 auto;
+    padding: 0.55rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--mud-palette-text-primary);
+    cursor: pointer;
+}
+
+.app-procdialog__unit:hover {
+    background: var(--mud-palette-surface);
+}
+
+.app-procdialog__unit--selected {
+    background: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+    font-weight: 600;
+}
+
+.app-procdialog__unit:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+/* --- Add / Edit Step dialog (screen 04) ----------------------------------------- */
+
+.app-stepdialog__ownerhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.app-stepdialog__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.2rem;
+}
+
+.app-stepdialog__noowners {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-stepdialog__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem 0.3rem 0.2rem 0.8rem;
+    border-radius: 999px;
+    background: var(--mud-palette-primary-hover);
+    color: var(--mud-palette-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.app-stepdialog__picker {
+    margin-top: 0.75rem;
+}
+
+.app-stepdialog__drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.75rem 1rem;
+    border: 2px dashed var(--mud-palette-lines-inputs);
+    border-radius: 12px;
+    color: var(--mud-palette-text-secondary);
+    text-align: center;
+}
+
+.app-stepdialog__upload {
+    width: 100%;
+}
+
+.app-stepdialog__drop {
+    cursor: pointer;
+}
+
+.app-stepdialog__drop:hover {
+    border-color: var(--mud-palette-primary);
+    color: var(--mud-palette-primary);
+}
+
+.app-stepdialog__picked {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 10px;
+    margin-bottom: 0.4rem;
+}
+
+.app-stepdialog__pickedname {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9375rem;
+}
+
+.app-stepdialog__pickedsize {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+.app-stepdialog__existing {
+    margin-top: 0.75rem;
+}
+
+/* --- Activity log / process history --------------------------------------------- */
+
+.app-activity__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.app-activity__item {
+    display: flex;
+    gap: 0.85rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-activity__item:last-child {
+    border-bottom: none;
+}
+
+.app-activity__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--mud-palette-primary-hover);
+    color: var(--mud-palette-primary);
+}
+
+.app-activity__body {
+    min-width: 0;
+}
+
+.app-activity__summary {
+    font-size: 0.9375rem;
+}
+
+.app-activity__meta {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+    margin-top: 0.15rem;
+}
+
+.app-activity__pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-activity__pagecount {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.875rem;
+}
+
+.app-bell__item {
+    display: flex;
+    flex-direction: column;
+    max-width: 280px;
+}
+
+/* --- Login screen (screen 01) -------------------------------------------------
+   Split layout: dark purple brand panel on the left, form on the right.
+   See Design/01-login-screen.png. */
+
+.app-login {
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-login__panel {
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3.5rem;
+    background: linear-gradient(160deg,
+        var(--mud-palette-appbar-background) 0%,
+        var(--mud-palette-primary) 100%);
+    color: var(--mud-palette-appbar-text);
+}
+
+/* The drawing in the purple panel.
+
+   min-height:0 with flex-shrink lets it be the thing that gives way when the
+   window is short: the brand and the pitch keep their size and this loses
+   height, rather than the panel overflowing.
+
+   No background of its own. The file shipped with a painted white rect across
+   the full canvas, which would have been a white sheet on the purple - that is
+   removed from the asset, so it composites onto the gradient. */
+.app-login__art {
+    /* 0 1 auto, not 1 1 auto: it may SHRINK to fit a short window but must not
+       grow to fill a tall one, or it stretches away from its aspect. */
+    flex: 0 1 auto;
+    min-height: 0;
+
+    width: 100%;
+    max-width: 30rem;
+
+    /* height:auto is doing real work. The tag carries height="973" so the
+       browser can reserve the right box before the file loads; without this
+       override that attribute wins, and the drawing renders 480 wide by 973
+       tall - stretched, and overflowing the page. */
+    height: auto;
+    max-height: 42vh;
+
+    margin: 1.5rem auto;
+    object-fit: contain;
+}
+
+/* Below this there is not enough height for the brand, the drawing AND the
+   pitch, and shrinking the drawing further only pushed the words off the
+   bottom - measured at 1280x560, where the pitch left the fold entirely. The
+   drawing goes; the sentence explaining the product stays. */
+@media (max-height: 760px) {
+    .app-login__art {
+        display: none;
+    }
+}
+
+.app-login__pitch-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 1rem;
+    max-width: 18ch;
+}
+
+.app-login__pitch-body {
+    margin: 0;
+    max-width: 46ch;
+    line-height: 1.6;
+    opacity: 0.82;
+}
+
+.app-login__form-side {
+    flex: 1 1 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    background: var(--mud-palette-surface);
+}
+
+.app-login__form {
+    width: 100%;
+    max-width: 420px;
+}
+
+.app-login__title {
+    color: var(--mud-palette-primary);
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+}
+
+.app-login__subtitle {
+    color: var(--mud-palette-text-secondary);
+    margin: 0 0 2rem;
+}
+
+.app-login__label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 1rem 0 0.35rem;
+}
+
+/* The design shows softly rounded rectangles here, not the rounded-pill outline
+   used everywhere else. This is the documented design reason that
+   Frontend/TeamConventions.md requires, and it is scoped to this page only. */
+.app-login__input .mud-input-outlined-border {
+    border-radius: 10px;
+}
+
+/* The show/hide-password button, pulled up to sit inside the field it belongs
+   to. The negative margin makes this a full-width strip lying ON TOP of the
+   password input, so without pointer-events: none the empty space to the left of
+   the icon swallows every click on the box and the field cannot be focused at
+   all. The button itself takes them back. */
+.app-login__reveal {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -2.6rem;
+    margin-right: 0.35rem;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.app-login__reveal > * {
+    pointer-events: auto;
+}
+
+.app-login__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.25rem 0 1.75rem;
+}
+
+.app-login__forgot {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.app-login__submit {
+    border-radius: 10px;
+    text-transform: none;
+    font-size: 1rem;
+    font-weight: 600;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+}
+
+.app-login__footer {
+    text-align: center;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.9rem;
+    margin: 2rem 0 0;
+}
+
+/* Below the tablet breakpoint the brand panel is dropped rather than stacked -
+   on a phone it would push the form below the fold. */
+@media (max-width: 899px) {
+    .app-login__panel {
+        display: none;
+    }
+
+    .app-login__form-side {
+        flex: 1 1 100%;
+    }
+}
+
+/* --- Blazor's own error strip ------------------------------------------------ */
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1500;
+    padding: 0.75rem 1.25rem;
+    background: var(--mud-palette-warning-lighten);
+    color: var(--mud-palette-text-primary);
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.2);
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+/* --- Admin approval queue ---------------------------------------------------- */
+
+.app-registrations {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.app-registrations__tabs {
+    margin-bottom: 0.25rem;
+}
+
+.app-registrations__person {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.app-registrations__muted {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+}
+
+/* Wide enough for "Manager" without the select collapsing the column. */
+.app-registrations__role {
+    min-width: 8.5rem;
+}
+
+/* The grid is the one table here that can outgrow its column on a narrow
+   screen. Scroll it rather than the page. */
+.app-registrations__table {
+    overflow-x: auto;
+}
+
+/* --- Sidebar row with a delete button ---------------------------------------- */
+
+/* NOT .app-sidebar__row - the anchor already owns that class, and reusing it
+   here put flex layout on the link as well as on its wrapper. The two are
+   different elements and need different names. */
+.app-sidebar__rowgroup {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.app-sidebar__rowgroup > a {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Hidden until the row is hovered or the button itself has keyboard focus.
+   Always-visible delete buttons on every row make a sidebar look like a
+   demolition site, but one that only appears on hover is unreachable by
+   keyboard - hence :focus-within as well. */
+.app-sidebar__delete {
+    flex: 0 0 auto;
+    opacity: 0;
+    transition: opacity 120ms ease-in-out;
+}
+
+.app-sidebar__rowgroup:hover .app-sidebar__delete,
+.app-sidebar__rowgroup:focus-within .app-sidebar__delete {
+    opacity: 1;
+}
+
+/* Touch has no hover, so on a coarse pointer it is simply always there. */
+@media (pointer: coarse) {
+    .app-sidebar__delete {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-sidebar__delete {
+        transition: none;
+    }
+}
+
+/* --- Person option in the owner picker --------------------------------------- */
+
+.app-personoption {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+}
+
+.app-personoption__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.app-personoption__name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.app-personoption__role {
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+    line-height: 1.3;
+}
+
+.app-personoption__empty {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+/* --- System context (JSON) page ---------------------------------------------- */
+
+/* Fills whatever the shell gives it rather than claiming the whole viewport.
+   height:100vh was right while this page had no app bar above it; inside the
+   shell it overflowed by exactly the height of the bar. The container is a
+   flex column, so flex:1 is the same intent without the arithmetic. */
+.app-context {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;
+    box-sizing: border-box;
+    background: var(--mud-palette-background-gray);
+}
+
+.app-context__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.app-context__title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--mud-palette-primary);
+}
+
+.app-context__subtitle {
+    margin: 0.25rem 0 0;
+    max-width: 62ch;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.9375rem;
+}
+
+.app-context__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex: none;
+}
+
+.app-context__bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 10px;
+    background: var(--mud-palette-surface);
+}
+
+.app-context__hint,
+.app-context__counts {
+    font-size: 0.8125rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-context__counts {
+    font-variant-numeric: tabular-nums;
+}
+
+/* The JSON pane takes whatever height is left and scrolls on its own, so the
+   page itself never scrolls and the toolbar above stays put. */
+/* Inside an accordion row now, not filling the page. flex:1 made it fight the
+   row for height; a max-height caps a long node instead so one open folder
+   cannot push everything below it off screen. */
+.app-context__json {
+    max-height: 28rem;
+    overflow: auto;
+    margin: 0 0.6rem 0.6rem;
+    padding: 1rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 10px;
+    background: var(--mud-palette-surface);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    white-space: pre;
+    tab-size: 2;
+}
+
+@media (max-width: 720px) {
+    .app-context__head {
+        flex-direction: column;
+    }
+}
+
+/* --- Hover preview on a process card ----------------------------------------- */
+
+/* Floats over what is below rather than pushing it down. Rendered inline first,
+   which shoved the whole page on every hover - a preview is not worth moving the
+   thing somebody is about to click.
+
+   Positioned against .app-flowstrip, NOT against the rail: the rail is
+   overflow-x: auto and clips anything inside it. */
+.app-flowstrip__preview {
+    /* FIXED, not absolute, and positioned from the pointer. Anchored to the
+       strip it always appeared at the far left, however far along the rail the
+       card was - so it read as belonging to card one whatever you hovered.
+       Fixed also escapes the rail's overflow entirely.
+
+       min() keeps it on screen when the card is near the right-hand edge. */
+    position: fixed;
+    top: var(--preview-y, 50%);
+    left: min(var(--preview-x, 1.25rem), calc(100vw - 35rem));
+    z-index: 30;
+
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 10px;
+    background: var(--mud-palette-surface);
+
+    /* It sits on top of other content, so it needs to read as a layer. */
+    box-shadow: 0 6px 24px -8px rgba(30, 23, 38, 0.28);
+
+    /* Pointer-transparent: it covers the step list underneath, and a preview
+       that eats clicks meant for what is below it is worse than no preview. */
+    pointer-events: none;
+}
+
+/* Wide enough for a paragraph, narrow enough to read as a label for one card. */
+.app-flowstrip__preview {
+    width: min(34rem, calc(100vw - 2rem));
+}
+
+.app-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.125rem;
+    text-align: left;
+}
+
+.app-preview--loading {
+    opacity: 0.75;
+}
+
+.app-preview__name {
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.app-preview__meta {
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-preview__description {
+    margin: 0.125rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}
+
+.app-preview__heading {
+    margin-top: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-preview__people {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.app-preview__hint {
+    margin-top: 0.375rem;
+    padding-top: 0.375rem;
+    border-top: 1px solid var(--mud-palette-lines-default);
+    font-size: 0.6875rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+/* --- Read-only process detail dialog ----------------------------------------- */
+
+.app-detaildialog__title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.app-detaildialog__meta {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.app-detaildialog__section {
+    margin-bottom: 1.25rem;
+}
+
+.app-detaildialog__heading {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.app-detaildialog__body {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+.app-detaildialog__people {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.625rem;
+}
+
+.app-detaildialog__steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.app-detaildialog__step {
+    padding: 0.75rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 10px;
+}
+
+.app-detaildialog__stepname {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.app-detaildialog__stepnum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--mud-palette-action-default-hover);
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex: none;
+}
+
+.app-detaildialog__stepbody {
+    margin: 0.375rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-detaildialog__stepowners {
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-detaildialog__shot {
+    margin-top: 0.625rem;
+    max-width: 100%;
+    max-height: 14rem;
+    border-radius: 8px;
+    border: 1px solid var(--mud-palette-lines-default);
+}
+
+/* --- Screenshot: clickable in the pane, full size in a dialog ---------------- */
+
+/* A bare button wrapper - no chrome of its own, so the screenshot looks exactly
+   as it did before it became clickable. */
+.app-process__shotbutton {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+}
+
+.app-process__shotbutton:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 3px;
+    border-radius: 10px;
+}
+
+.app-shotdialog__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Fills the dialog and centres the image, whatever shape it is. */
+.app-shotdialog__surface {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 60vh;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-out;
+}
+
+.app-shotdialog__image {
+    max-width: 100%;
+    max-height: calc(100vh - 12rem);
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* --- Chat --------------------------------------------------------------------
+   A column that fills the screen: the transcript scrolls, the composer stays put
+   at the bottom. The page itself must not scroll, or the composer walks off. */
+
+.app-chat {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 1rem;
+}
+
+/* Transcript and mascot side by side; the composer spans the full width
+   underneath, because a composer that stops short of the edge reads as a
+   text field rather than the thing you type into. */
+.app-chat__body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 1.5rem;
+}
+
+.app-chat__log {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-right: 0.5rem;
+}
+
+.app-chat__bubble {
+    max-width: min(46rem, 85%);
+    padding: 0.85rem 1.1rem;
+    border-radius: 14px;
+}
+
+.app-chat__bubble--person {
+    align-self: flex-end;
+    background: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+}
+
+.app-chat__bubble--portal {
+    align-self: flex-start;
+    background: var(--mud-palette-surface);
+    border: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-chat__who {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 0.3rem;
+}
+
+/* The answer is plain text with newlines in it, never markup. pre-wrap keeps its
+   line breaks without the browser ever parsing it as HTML. */
+.app-chat__text {
+    white-space: pre-wrap;
+    line-height: 1.55;
+}
+
+.app-chat__text--muted {
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.app-chat__sources {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-chat__sourcelabel {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.app-chat__source {
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--mud-palette-primary) 12%, transparent);
+    color: var(--mud-palette-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.app-chat__source:hover {
+    background: color-mix(in srgb, var(--mud-palette-primary) 22%, transparent);
+}
+
+/* --- Empty state ------------------------------------------------------------ */
+
+.app-chat__empty {
+    margin: auto;
+    max-width: 34rem;
+    text-align: center;
+}
+
+.app-chat__emptyicon {
+    color: var(--mud-palette-primary);
+    opacity: 0.5;
+}
+
+.app-chat__emptytitle {
+    margin-top: 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--mud-palette-primary);
+}
+
+.app-chat__emptybody {
+    margin: 0.5rem 0 1.25rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-chat__suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.app-chat__suggestion {
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 999px;
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.app-chat__suggestion:hover {
+    border-color: var(--mud-palette-primary);
+    color: var(--mud-palette-primary);
+}
+
+/* --- Composer ---------------------------------------------------------------- */
+
+.app-chat__composer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    padding-top: 1rem;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-chat__input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 999px;
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+}
+
+.app-chat__input:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 1px;
+}
+
+.app-chat__error {
+    flex: 0 0 auto;
+}
+
+/* Present to a screen reader, absent to everyone else. For labels whose field is
+   already obvious from its placeholder and position. */
+.app-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- The mascot ---------------------------------------------------------------
+   A reserved column beside the transcript. Fixed width so the transcript's line
+   length does not change when the bot appears, and dropped entirely on a narrow
+   screen - the chat is the point and the bot is not. */
+
+.app-chat__mascot {
+    flex: 0 0 20rem;
+    display: flex;
+    align-items: center;
+
+    /* Hard against the right-hand edge. Centred, it left a gutter beside it
+       that read as the page being broken rather than as deliberate space. */
+    justify-content: flex-end;
+
+    /* No padding on the right, and pulled out past the container's own 2.5rem
+       so the drawing runs to the true edge of the page. */
+    padding: 1rem 0 1rem 1rem;
+    margin-right: -2.5rem;
+}
+
+.app-chat__mascotgif {
+    max-width: 100%;
+    max-height: 26rem;
+    object-fit: contain;
+}
+
+.app-chat__mascotart {
+    width: 100%;
+    max-width: 11rem;
+    animation: app-bot-float 4s ease-in-out infinite;
+}
+
+.app-chat__bot {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.app-chat__bothead,
+.app-chat__botbody {
+    fill: var(--mud-palette-surface);
+    stroke: var(--mud-palette-primary);
+    stroke-width: 3;
+}
+
+.app-chat__botantenna {
+    stroke: var(--mud-palette-primary);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.app-chat__botblip {
+    fill: var(--mud-palette-primary);
+    animation: app-bot-blip 2s ease-in-out infinite;
+}
+
+.app-chat__boteyes {
+    fill: var(--mud-palette-primary);
+
+    /* Scaled about the eyes' own midline, so a blink closes the lids rather
+       than shrinking them towards the corner of the head. */
+    transform-origin: 60px 64px;
+    transform-box: fill-box;
+    animation: app-bot-blink 5.5s ease-in-out infinite;
+}
+
+.app-chat__botmouth {
+    fill: var(--mud-palette-primary);
+    opacity: 0.75;
+}
+
+/* Waiting for an answer: faster bob, and the mouth ticks along as if talking. */
+.app-chat__mascotart--thinking {
+    animation-duration: 1.4s;
+}
+
+.app-chat__mascotart--thinking .app-chat__botmouth {
+    animation: app-bot-talk 0.5s steps(2, end) infinite;
+}
+
+.app-chat__mascotart--thinking .app-chat__botblip {
+    animation-duration: 0.7s;
+}
+
+@keyframes app-bot-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+
+@keyframes app-bot-blip {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+}
+
+@keyframes app-bot-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96%           { transform: scaleY(0.1); }
+}
+
+@keyframes app-bot-talk {
+    0%   { transform: scaleX(1); }
+    100% { transform: scaleX(0.55); }
+}
+
+/* Nobody who has asked for less motion wants a bobbing robot. Everything above
+   is decoration, so all of it stops - the chat itself is unaffected. */
+@media (prefers-reduced-motion: reduce) {
+    .app-chat__mascotart,
+    .app-chat__botblip,
+    .app-chat__boteyes,
+    .app-chat__botmouth {
+        animation: none;
+    }
+}
+
+/* Below this the transcript needs the whole width. */
+@media (max-width: 1100px) {
+    .app-chat__mascot {
+        display: none;
+    }
+}
+
+/* --- The package tree ---------------------------------------------------------
+   Native <details>, three deep. Everything shut on arrival: this page used to
+   open on eight hundred lines of JSON with whatever you wanted somewhere in the
+   middle of it. */
+
+.app-context__tree {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-right: 0.5rem;
+}
+
+.app-context__node {
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 8px;
+    background: var(--mud-palette-surface);
+}
+
+/* The whole portal in one blob, kept at the top for the copy-and-paste job this
+   page was built for. */
+.app-context__node--all {
+    border-color: var(--mud-palette-primary);
+}
+
+.app-context__summary {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+
+    /* The default triangle is tiny and sits badly against a flex row. The one
+       below is drawn instead - see ::before. */
+    list-style: none;
+}
+
+.app-context__summary::-webkit-details-marker {
+    display: none;
+}
+
+.app-context__summary::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    opacity: 0.5;
+    transition: transform 0.12s ease;
+}
+
+.app-context__node[open] > .app-context__summary::before {
+    transform: rotate(90deg);
+}
+
+.app-context__summary:hover {
+    background: color-mix(in srgb, var(--mud-palette-primary) 6%, transparent);
+}
+
+.app-context__summary:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+.app-context__nodenum {
+    flex: 0 0 auto;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--mud-palette-primary) 12%, transparent);
+    color: var(--mud-palette-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.app-context__nodename {
+    font-weight: 600;
+}
+
+/* Pushed right and allowed to disappear first: it is context, and the name is
+   the thing being scanned for. */
+.app-context__nodemeta {
+    margin-left: auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.75rem;
+}
+
+.app-context__children {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0 0.6rem 0.6rem 1.6rem;
+}
+
+.app-context__none {
+    margin: 0 0 0.4rem;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-context__summary::before {
+        transition: none;
+    }
+}
+
+/* --- Screenshots in an answer ------------------------------------------------
+   Thumbnails, not full-size images: a screenshot at its own size inside a chat
+   bubble pushes the conversation off the screen. Clicking opens the real one. */
+
+.app-chat__shots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+}
+
+.app-chat__shot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    max-width: 14rem;
+
+    padding: 0.35rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 10px;
+    background: var(--mud-palette-background);
+    cursor: zoom-in;
+    font: inherit;
+    text-align: left;
+}
+
+.app-chat__shot:hover {
+    border-color: var(--mud-palette-primary);
+}
+
+.app-chat__shot:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 1px;
+}
+
+.app-chat__shot img {
+    display: block;
+    width: 100%;
+    height: 7rem;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.app-chat__shotcaption {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.6875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-chat__emptybody--aside {
+    font-size: 0.875rem;
+    opacity: 0.85;
+}
+
+/* --- Landing page -------------------------------------------------------------
+   Where you arrive. Four tiles, each saying what its section is for and what
+   pressing it does. */
+
+.app-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 2.5rem;
+    padding: 2rem 0;
+}
+
+.app-home__head {
+    text-align: center;
+}
+
+.app-home__title {
+    margin: 0;
+    color: var(--mud-palette-primary);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+}
+
+.app-home__subtitle {
+    margin: 0.4rem 0 0;
+    color: var(--mud-palette-text-secondary);
+    font-size: 1.0625rem;
+}
+
+/* Width and height are on the tag as well, so the browser reserves the right
+   box before the file arrives and the tiles below do not jump when it does.
+
+   No blend mode. The drawing's own ground is rgb(243,240,247) and the page is
+   rgb(245,244,248) - close enough that the edge is invisible. multiply was
+   tried and made it worse: two near-white grounds multiplied land around 233,
+   which is a darker rectangle where there had been no seam at all. */
+.app-home__hero {
+    width: 100%;
+    max-width: 32rem;
+    height: auto;
+    border-radius: 16px;
+}
+
+.app-home__tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 68rem;
+}
+
+.app-home__tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    padding: 1.5rem 1.25rem 1.25rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 16px;
+    background: var(--mud-palette-surface);
+
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-home__tile:hover,
+.app-home__tile:focus-visible {
+    border-color: var(--mud-palette-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgb(0 0 0 / 8%);
+}
+
+.app-home__tile:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+/* Fixed height, so dropping artwork in cannot change the tile's shape and make
+   a row of them disagree about where their titles sit. */
+.app-home__art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 6.5rem;
+    margin-bottom: 0.85rem;
+
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--mud-palette-primary) 7%, transparent);
+    color: var(--mud-palette-primary);
+}
+
+.app-home__art img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+.app-home__name {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--mud-palette-primary);
+}
+
+.app-home__purpose {
+    margin: 0.4rem 0 0;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+/* What clicking does. Present in the DOM always - a screen reader reads it as
+   part of the link - and revealed to the eye on hover or keyboard focus, so a
+   resting grid stays readable rather than being four paragraphs. */
+.app-home__action {
+    display: block;
+    overflow: hidden;
+
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+
+    color: var(--mud-palette-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    transition: max-height 0.18s ease, opacity 0.18s ease, margin-top 0.18s ease;
+}
+
+.app-home__tile:hover .app-home__action,
+.app-home__tile:focus-visible .app-home__action {
+    max-height: 3rem;
+    margin-top: 0.7rem;
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-home__tile,
+    .app-home__action {
+        transition: none;
+    }
+
+    .app-home__tile:hover,
+    .app-home__tile:focus-visible {
+        transform: none;
+    }
+}
+
+/* --- Add: step or process? ----------------------------------------------------
+   Two full-width choices rather than a menu, each saying where the thing lands
+   rather than only naming it. */
+
+.app-addchooser__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-addchooser {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.app-addchooser__choice {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 0.85rem;
+    row-gap: 0.2rem;
+    align-items: start;
+    text-align: left;
+
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 12px;
+    background: var(--mud-palette-surface);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.app-addchooser__choice:hover {
+    border-color: var(--mud-palette-primary);
+    background: color-mix(in srgb, var(--mud-palette-primary) 5%, transparent);
+}
+
+.app-addchooser__choice:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.app-addchooser__icon {
+    grid-row: 1 / span 2;
+    color: var(--mud-palette-primary);
+}
+
+.app-addchooser__name {
+    font-weight: 700;
+    color: var(--mud-palette-primary);
+}
+
+.app-addchooser__what {
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}

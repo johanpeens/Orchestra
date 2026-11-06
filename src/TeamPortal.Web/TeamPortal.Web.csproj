@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>43d3e30f-d515-42a0-9b3b-3327e39471fa</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Web references Application only. It must NOT reference Mock or
+         Infrastructure directly - only their AddMockData()/AddSqlData()
+         extension method, wired up in Program.cs. See Frontend/BuildPlan.md. -->
+    <ProjectReference Include="..\TeamPortal.Application\TeamPortal.Application.csproj" />
+    <ProjectReference Include="..\TeamPortal.Infrastructure\TeamPortal.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,84 @@
+@page "/confirm-email"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+
+@* Where the link in the confirmation email lands. Runs on load and shows one of
+   three outcomes - confirmed, already confirmed, or a link that is no longer
+   good. Anonymous by necessity: nobody can sign in until this has run. *@
+
+<PageTitle>Confirm your email - Orchestra</PageTitle>
+
+<div class="app-login">
+
+    <aside class="app-login__panel">
+        <div class="app-login__brand">
+            <AppBrand />
+        </div>
+
+        <div class="app-login__pitch">
+            <h1 class="app-login__pitch-title">Almost there</h1>
+            <p class="app-login__pitch-body">
+                Confirming your address is the first of two steps. An administrator approves
+                the account afterwards, and we will email you when that is done.
+            </p>
+        </div>
+    </aside>
+
+    <main class="app-login__form-side">
+        <div class="app-login__form" role="status" aria-live="polite">
+
+            @if (_checking)
+            {
+                <LoadingPanel Message="Confirming your email address..." />
+            }
+            else if (_confirmed)
+            {
+                <MudIcon Icon="@Icons.Material.Outlined.CheckCircle"
+                         Color="Color.Success"
+                         Size="Size.Large"
+                         Class="mb-4" />
+
+                <h2 class="app-login__title">Email confirmed</h2>
+                <p class="app-login__subtitle">
+                    Thank you. Your account is now waiting for an administrator to approve it.
+                    We will email you the moment it is ready - you do not need to do anything else.
+                </p>
+
+                <MudButton Href="/login"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           Size="Size.Large"
+                           Class="app-login__submit">
+                    Back to sign in
+                </MudButton>
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Outlined.LinkOff"
+                         Color="Color.Error"
+                         Size="Size.Large"
+                         Class="mb-4" />
+
+                <h2 class="app-login__title">This link is no longer good</h2>
+                <p class="app-login__subtitle">@_error</p>
+
+                <MudButton Href="/register"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           Size="Size.Large"
+                           Class="app-login__submit">
+                    Register again
+                </MudButton>
+
+                <p class="app-login__footer">
+                    Already confirmed?
+                    <MudLink Href="/login" Color="Color.Primary"><b>Sign in</b></MudLink>
+                </p>
+            }
+
+        </div>
+    </main>
+
+</div>

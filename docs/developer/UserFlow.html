@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Portal - User Flow</title>
+<style>
+  :root {
+    --ink:    #222227;
+    --muted:  #4C4A4F;
+    --line:   #D5CBDD;
+    --purple: #4A2767;
+    --orange: #E55218;
+    --aqua:   #44B4A6;
+    --gold:   #9A8445;
+    --red:    #CF1230;
+    --paper:  #FFFFFF;
+    --wash:   #F7F5F9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.5rem 5rem;
+    background: var(--wash);
+    color: var(--ink);
+    font-family: "Brand Sans", Quicksand, Mulish, "Be Vietnam Pro", sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+  .overline {
+    color: var(--aqua); font-size: .8125rem; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; margin: 0 0 .35rem;
+  }
+  h1 { color: var(--purple); font-size: 2rem; font-weight: 700; margin: 0 0 .5rem; }
+  h2 {
+    color: var(--purple); font-size: 1.25rem; font-weight: 700;
+    margin: 3rem 0 .5rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line);
+  }
+  h3 { color: var(--purple); font-size: 1rem; font-weight: 700; margin: 2rem 0 .35rem; }
+  p.lede { color: var(--muted); margin: 0; max-width: 68ch; }
+  p.note { color: var(--muted); font-size: .9375rem; margin: .25rem 0 1.25rem; max-width: 78ch; }
+  .panel {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.25rem; overflow-x: auto;
+  }
+  .mermaid { min-width: 680px; }
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+  .legend li {
+    display: flex; align-items: center; gap: .45rem;
+    font-size: .875rem; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: .3rem .8rem; background: var(--paper);
+  }
+  .swatch { width: 1.1rem; height: .8rem; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: .9375rem; }
+  th, td { text-align: left; padding: .55rem .75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--purple); color: #fff; font-weight: 600; }
+  th:first-child { border-top-left-radius: 8px; }
+  th:last-child  { border-top-right-radius: 8px; }
+  tbody tr:nth-child(even) { background: var(--wash); }
+  code {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: .875em; background: var(--wash);
+    border: 1px solid var(--line); border-radius: 4px; padding: .05rem .3rem;
+  }
+  footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line);
+           color: var(--muted); font-size: .875rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="overline">Team Portal</p>
+    <h1>User Flow &amp; Modals</h1>
+    <p class="lede">
+      Every screen, every dialog, and every route between them. Screen numbers match the
+      files in <code>Design/</code>. The tables each step reads and writes are listed in
+      <code>Doc/DataModel.md</code>.
+    </p>
+  </header>
+
+  <h2>1. How to read this</h2>
+  <ul class="legend">
+    <li><span class="swatch" style="background:#EDE6F2;border-color:#4A2767"></span> Full screen</li>
+    <li><span class="swatch" style="background:#FCE0CF;border-color:#E55218"></span> Modal dialog</li>
+    <li><span class="swatch" style="background:#FFFFFF;border-color:#9A8445"></span> Decision</li>
+    <li><span class="swatch" style="background:#E3F1EF;border-color:#44B4A6"></span> Saves to the database</li>
+    <li><span class="swatch" style="background:#F6D7D0;border-color:#CF1230"></span> Blocked or error</li>
+  </ul>
+  <p class="note" style="margin-top:1rem">
+    A <strong>modal</strong> is a dialog that floats on top of the page and blocks the rest
+    of it until you either save or cancel. Every modal in this app has exactly two ways
+    out: <em>Save</em> writes to the database and refreshes the page behind it, or
+    <em>Cancel</em> throws the changes away and leaves the page untouched.
+  </p>
+
+  <h2>2. The whole app at a glance</h2>
+  <p class="note">
+    Two screens do all the work. Everything else is a dialog on top of one of them.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+flowchart TD
+    Start([Open the portal]) --> Signed{Already signed in?}
+    Signed -- No --> Login["01 - Login screen"]
+    Signed -- Yes --> Dash["02 - Process dashboard"]
+
+    Login --> Check{Email and password correct?}
+    Check -- Yes --> Dash
+    Check -- No --> Fail["Show error and count the failed attempt"]
+    Fail --> Lock{Five failures in a row?}
+    Lock -- Yes --> Locked["Account locked for 15 minutes"]
+    Lock -- No --> Login
+    Login --> Forgot["Forgot password - email a reset link"]
+    Forgot --> Login
+
+    Dash --> Team["05 - Team screen"]
+    Team --> Dash
+
+    Dash --> M1[/"03 - Add Process modal"/]
+    Dash --> M2[/"04 - Add Step modal"/]
+    Dash --> M6[/"Add Folder modal"/]
+    Dash --> Hist["Process history panel"]
+
+    Team --> M3[/"06 - Add Employee modal"/]
+    Team --> M4[/"07 - Edit Department modal"/]
+    Team --> Log["Activity log panel"]
+
+    Dash --> Out["Sign out"]
+    Team --> Out
+    Out --> Login
+
+    classDef screen fill:#EDE6F2,stroke:#4A2767,stroke-width:2px,color:#222227
+    classDef modal  fill:#FCE0CF,stroke:#E55218,stroke-width:2px,color:#222227
+    classDef error  fill:#F6D7D0,stroke:#CF1230,stroke-width:2px,color:#222227
+    class Login,Dash,Team,Hist,Log screen
+    class M1,M2,M3,M4,M6 modal
+    class Fail,Locked error
+    </pre>
+  </div>
+
+  <h2>3. Signing in</h2>
+  <p class="note">
+    Handled entirely by ASP.NET Core Identity. The <strong>Remember me</strong> tickbox is
+    the <code>isPersistent</code> argument to <code>PasswordSignInAsync</code>; leave it
+    off and the cookie dies when the browser closes.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+flowchart TD
+    A([Land on 01 - Login screen]) --> B["Type email and password"]
+    B --> C{Remember me ticked?}
+    C -- Yes --> D["Cookie survives closing the browser"]
+    C -- No --> E["Cookie dies with the session"]
+    D --> F["Press Sign In to Workspace"]
+    E --> F
+
+    F --> G{Does the account exist and is it active?}
+    G -- No --> H["Same generic error - never say which half was wrong"]
+    H --> B
+
+    G -- Yes --> I{Is the password right?}
+    I -- No --> J["Increase AccessFailedCount"]
+    J --> K{Count reached five?}
+    K -- Yes --> L["Lock the account for 15 minutes"]
+    K -- No --> H
+    L --> M["Tell the user to try again later or contact an admin"]
+
+    I -- Yes --> N["Reset the failure count"]
+    N --> O["Stamp AppUser.LastLoginAt"]
+    O --> P["Write a LoggedIn row to ActivityLog"]
+    P --> Q["02 - Process dashboard"]
+
+    B -.-> R["Click Forgot password"]
+    R --> S["Ask for the email address"]
+    S --> T["Always show the same confirmation - do not leak who has an account"]
+    T --> U["Email a one-time reset token"]
+    U --> V["Set a new password"]
+    V --> A
+
+    classDef screen fill:#EDE6F2,stroke:#4A2767,stroke-width:2px,color:#222227
+    classDef save   fill:#E3F1EF,stroke:#44B4A6,stroke-width:2px,color:#222227
+    classDef error  fill:#F6D7D0,stroke:#CF1230,stroke-width:2px,color:#222227
+    class A,Q screen
+    class N,O,P,U,V save
+    class H,J,L,M error
+    </pre>
+  </div>
+
+  <h2>4. The process side</h2>
+  <p class="note">
+    Screen <code>02</code> plus its two modals. This is where the business writes down how
+    a job actually gets done, step by numbered step.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+flowchart TD
+    D["02 - Process dashboard"] --> D1["Pick a folder in the left sidebar"]
+    D1 --> D2["Flow strip shows the folder's PROCESSES in order"]
+    D2 --> D3["Click a process card"]
+    D3 --> D4["Step list shows that process's STEPS in order"]
+    D4 --> D5["Click a step"]
+    D5 --> D6["Step panel shows description, owners and screenshot"]
+    D6 --> D7{"Press Next on the last step?"}
+    D7 -- No --> D5
+    D7 -- Yes --> D8["Move on to the first step of the next process"]
+    D8 --> D4
+
+    D --> H1["View Process History"]
+    H1 --> H2["Read-only list from ActivityLog, newest first"]
+    H2 --> D
+
+    %% ---------- Add Process ----------
+    D --> P0["Press Add Process"]
+    P0 --> P1[/"03 - Add Process modal"/]
+    P1 --> P2["Type a Process Name - required"]
+    P2 --> P3["Type a Process Description - optional"]
+    P3 --> P4["Pick a department from the Select Business Unit tabs"]
+    P4 --> P5{Press Save Process}
+    P5 -- Cancel --> D
+    P5 -- Save --> P6{Name filled in and unique in this folder?}
+    P6 -- No --> P7["Show the field error and stay open"]
+    P7 --> P2
+    P6 -- Yes --> P8["Insert into Process"]
+    P8 --> P9["Write a Created row to ActivityLog"]
+    P9 --> P10["Close the modal and refresh the sidebar"]
+    P10 --> D
+
+    P1 --> PD1{Press Delete Process}
+    PD1 --> PD2["Confirm - this cannot be undone from the UI"]
+    PD2 --> PD3["Set IsDeleted on the Process and its Steps"]
+    PD3 --> D
+
+    %% ---------- Add Step ----------
+    D --> S0["Press Add in the Process Steps panel"]
+    S0 --> S1[/"04 - Add Step modal"/]
+    S1 --> S2["Type a Step Name - required"]
+    S2 --> S3["Type a Step Description - optional"]
+    S3 --> S4["Pick a Department"]
+    S4 --> S5["Add Team Member chips - the Responsible Persons"]
+    S5 --> S6["Drag and drop a reference screenshot - optional"]
+    S6 --> S7{"Is the file a PNG, JPG or WEBP under 5MB?"}
+    S7 -- No --> S8["Reject the file and say why"]
+    S8 --> S6
+    S7 -- Yes --> S9{Press Save Process}
+    S9 -- Cancel --> D
+    S9 -- Save --> S10{Step Name filled in?}
+    S10 -- No --> S11["Show the field error and stay open"]
+    S11 --> S2
+    S10 -- Yes --> S12["Work out the next StepNumber"]
+    S12 --> S13["Insert into ProcessStep with status Not Started"]
+    S13 --> S14["Insert one StepOwner row per chosen person"]
+    S14 --> S15["Save the file and insert into StepImage"]
+    S15 --> S16["Write a Created row to ActivityLog"]
+    S16 --> S17["Close the modal and refresh the flow strip"]
+    S17 --> D
+
+    classDef screen fill:#EDE6F2,stroke:#4A2767,stroke-width:2px,color:#222227
+    classDef modal  fill:#FCE0CF,stroke:#E55218,stroke-width:2px,color:#222227
+    classDef save   fill:#E3F1EF,stroke:#44B4A6,stroke-width:2px,color:#222227
+    classDef error  fill:#F6D7D0,stroke:#CF1230,stroke-width:2px,color:#222227
+    class D,H2 screen
+    class P1,S1 modal
+    class P8,P9,P10,PD3,S12,S13,S14,S15,S16,S17 save
+    class P7,S8,S11 error
+    </pre>
+  </div>
+
+  <h2>5. The team side</h2>
+  <p class="note">
+    Screen <code>05</code> plus its three modals. This is the address book that the process
+    steps point at.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+flowchart TD
+    T["05 - Team screen"] --> T1["Employee cards for the chosen department"]
+    T1 --> T2["Filter by department in the middle column"]
+    T2 --> T1
+    T1 --> T3["Search by name, role or department"]
+    T3 --> T1
+
+    T --> L1["View Activity Log"]
+    L1 --> L2["Read-only list from ActivityLog, newest first"]
+    L2 --> T
+
+    %% ---------- Add Employee ----------
+    T --> E0["Press ADD EMPLOYEE"]
+    E0 --> E1[/"06 - Add Employee modal"/]
+    E1 --> E2["Type an Employee Name - required"]
+    E2 --> E3["Type a Role - optional"]
+    E3 --> E4["Pick a Department - required"]
+    E4 --> E5["Choose Employee or Management"]
+    E5 --> E6["Upload a photo - optional"]
+    E6 --> E7{Press Save}
+    E7 -- Cancel --> T
+    E7 -- Save --> E8{Name filled in and department chosen?}
+    E8 -- No --> E9["Show the field error and stay open"]
+    E9 --> E2
+    E8 -- Yes --> E10["Insert into Employee"]
+    E10 --> E11["Write a Created row to ActivityLog"]
+    E11 --> E12["Close the modal and refresh the cards and counts"]
+    E12 --> T
+
+    %% ---------- Edit Department ----------
+    T --> C0["Press the pencil next to a department"]
+    C0 --> C1[/"07 - Edit Department modal"/]
+    C1 --> C2["Rename the department"]
+    C2 --> C3["Pick a theme colour from the eight swatches"]
+    C3 --> C4["Live preview chip updates as you pick"]
+    C4 --> C5{Press Save Changes}
+    C5 -- Cancel --> T
+    C5 -- Save --> C6{Name filled in and still unique?}
+    C6 -- No --> C7["Show the field error and stay open"]
+    C7 --> C2
+    C6 -- Yes --> C8["Update Department name and ColourHex"]
+    C8 --> C9["Write an Updated row to ActivityLog"]
+    C9 --> C10["Close the modal - the new colour repaints every step tag too"]
+    C10 --> T
+
+    classDef screen fill:#EDE6F2,stroke:#4A2767,stroke-width:2px,color:#222227
+    classDef modal  fill:#FCE0CF,stroke:#E55218,stroke-width:2px,color:#222227
+    classDef save   fill:#E3F1EF,stroke:#44B4A6,stroke-width:2px,color:#222227
+    classDef error  fill:#F6D7D0,stroke:#CF1230,stroke-width:2px,color:#222227
+    class T,L2 screen
+    class E1,C1 modal
+    class E10,E11,E12,C8,C9,C10 save
+    class E9,C7 error
+    </pre>
+  </div>
+
+  <h2>6. What happens when you press Save</h2>
+  <p class="note">
+    Saving a step is the most involved write in the app - it touches four tables. Blazor
+    Server means every one of these arrows is a SignalR round trip, so the whole thing
+    runs inside a single database transaction and the Save button is disabled until it
+    returns.
+  </p>
+  <div class="panel">
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant M as Add Step modal
+    participant S as ProcessStepService
+    participant V as Validator
+    participant F as File storage
+    participant DB as SQL Server
+
+    U->>M: Fill in the form and press Save
+    M->>M: Disable Save, show the spinner
+    M->>S: CreateStepAsync(request)
+    S->>V: Validate the request
+    alt Something is wrong
+        V-->>S: List of errors
+        S-->>M: Failed result
+        M-->>U: Red field messages, modal stays open
+    else Everything checks out
+        V-->>S: OK
+        S->>DB: Begin transaction
+        S->>DB: Next StepNumber for this process
+        S->>DB: INSERT ProcessStep
+        S->>DB: INSERT StepOwner per person
+        opt A screenshot was attached
+            S->>F: Save the file, get back a path
+            F-->>S: StoredPath
+            S->>DB: INSERT StepImage
+        end
+        S->>DB: INSERT ActivityLog
+        S->>DB: Commit
+        DB-->>S: Saved
+        S-->>M: Success with the new step id
+        M-->>U: Close, green snackbar, flow strip refreshed
+    end
+    </pre>
+  </div>
+
+  <h2>7. Modal inventory</h2>
+  <p class="note">
+    Every dialog in the app, its MudBlazor size per <code>Frontend/TeamConventions.md</code>,
+    and which tables it writes.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Modal</th><th>Opened from</th><th>Size</th><th>Writes to</th><th>Who may open it</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>03 - Add / Edit Process</td><td>ADD PROCESS button</td><td><code>md</code></td>
+        <td><code>Process</code>, <code>ActivityLog</code></td><td>Admin, Manager</td>
+      </tr>
+      <tr>
+        <td>04 - Add / Edit Step</td><td>Add button in the steps panel</td><td><code>md</code></td>
+        <td><code>ProcessStep</code>, <code>StepOwner</code>, <code>StepImage</code>, <code>ActivityLog</code></td>
+        <td>Admin, Manager</td>
+      </tr>
+      <tr>
+        <td>06 - Add / Edit Employee</td>
+        <td>ADD EMPLOYEE button, or the pencil on an employee card</td>
+        <td><code>md</code></td>
+        <td><code>Employee</code>, <code>ActivityLog</code></td><td>Admin, Manager</td>
+      </tr>
+      <tr>
+        <td>07 - Edit Department</td><td>Pencil icon on a department row</td><td><code>sm</code></td>
+        <td><code>Department</code>, <code>ActivityLog</code></td><td>Admin, Manager</td>
+      </tr>
+      <tr>
+        <td>Add Folder</td><td>New Folder button on the process sidebar</td><td><code>sm</code></td>
+        <td><code>ProcessFolder</code>, <code>ActivityLog</code></td><td>Admin, Manager</td>
+      </tr>
+      <tr>
+        <td>Confirm Delete</td><td>Any Delete button</td><td><code>sm</code></td>
+        <td>Sets <code>IsDeleted</code> on the target</td><td>Admin, Manager</td>
+      </tr>
+      <tr>
+        <td>Upload Screenshot</td><td>Upload Screenshot button on a step</td><td><code>sm</code></td>
+        <td><code>StepImage</code>, <code>ActivityLog</code></td><td>Admin, Manager, Member</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>8. Rules every modal follows</h2>
+  <p class="note">These come from <code>Frontend/TeamConventions.md</code> and apply without exception.</p>
+  <ul class="note" style="max-width:78ch">
+    <li>Save and Submit sit on the <strong>left</strong>; Cancel and Close sit on the <strong>right</strong>.</li>
+    <li>Cancel never writes anything. Closing with the X behaves exactly like Cancel.</li>
+    <li>The Save button is disabled while the save is in flight, so a double-click cannot create two rows.</li>
+    <li>Validation errors keep the modal open and put the message under the offending field. A snackbar is not enough - the user cannot see which box is wrong.</li>
+    <li>Delete always opens a small confirm dialog first, and only ever soft-deletes.</li>
+    <li>After a successful save the modal closes, a green snackbar appears, and the page behind it reloads its data. The user should never have to refresh the browser.</li>
+  </ul>
+
+  <footer>
+    Team Portal &middot; user flow &middot; companion to
+    <code>Doc/DataModel.md</code> and <code>Doc/ErDiagram.html</code>
+  </footer>
+
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: "basis", nodeSpacing: 45, rankSpacing: 55 },
+    sequence: { useMaxWidth: true, actorMargin: 45 },
+    themeVariables: {
+      fontFamily: '"Brand Sans", Quicksand, Mulish, sans-serif',
+      fontSize: "14px",
+      primaryColor:       "#EDE6F2",
+      primaryTextColor:   "#222227",
+      primaryBorderColor: "#4A2767",
+      lineColor:          "#896D98",
+      secondaryColor:     "#FCE0CF",
+      tertiaryColor:      "#FFFFFF"
+    }
+  });
+</script>
+</body>
+</html>

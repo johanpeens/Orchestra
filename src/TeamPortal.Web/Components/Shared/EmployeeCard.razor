@@ -1,0 +1,47 @@
+@* One card on the Team screen. Circular avatar, name, role, department, and an
+   Employee/Management chip. See docs/design/05-team-management-screen.png. *@
+
+<MudPaper Elevation="0" Class="app-empcard">
+    @if (OnEdit.HasDelegate)
+    {
+        <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                       Size="Size.Small"
+                       Class="app-empcard__edit"
+                       aria-label="@($"Edit {Employee.FullName}")"
+                       OnClick="@(() => OnEdit.InvokeAsync(Employee.Id))" />
+    }
+
+    <div class="app-empcard__avatar">
+        @if (!string.IsNullOrWhiteSpace(Employee.PhotoUrl))
+        {
+            <MudAvatar Size="Size.Large">
+                <MudImage Src="@Employee.PhotoUrl" Alt="@($"Photo of {Employee.FullName}")" />
+            </MudAvatar>
+        }
+        else
+        {
+            @* justification: the initials are decoration behind the name, which is
+               already read out immediately below. Announcing both repeats it. *@
+            <MudAvatar Size="Size.Large" Class="app-empcard__initials" aria-hidden="true">
+                @Employee.Initials
+            </MudAvatar>
+        }
+    </div>
+
+    <div class="app-empcard__name">@Employee.FullName</div>
+
+    @if (!string.IsNullOrWhiteSpace(Employee.JobTitle))
+    {
+        <div class="app-empcard__role">@Employee.JobTitle</div>
+    }
+
+    <div class="app-empcard__dept">@Employee.DepartmentName</div>
+
+    <MudChip T="string"
+             Variant="Variant.Outlined"
+             Size="Size.Small"
+             Color="@(Employee.IsManagement ? Color.Primary : Color.Default)"
+             Class="app-empcard__chip">
+        @(Employee.IsManagement ? "Management" : "Employee")
+    </MudChip>
+</MudPaper>

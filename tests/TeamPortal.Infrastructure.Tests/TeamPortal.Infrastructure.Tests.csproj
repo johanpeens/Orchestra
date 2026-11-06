@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- For SignInManager and the Identity option types. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+
+    <!--
+      Sqlite, not the EF Core InMemory provider - see the ban in
+      Directory.Packages.props. InMemory ignores unique indexes, foreign keys and
+      query filters, so a test that "passes" against it can still fail against
+      SQL Server. Sqlite enforces all three and starts in milliseconds.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TeamPortal.Infrastructure\TeamPortal.Infrastructure.csproj" />
+
+    <!--
+      The mock data layer, so Seeder_ProducesTheSameDataAsTheMockStore can hold
+      the two sides of the seam against each other. If the seeded database and
+      the Part A mock ever drift, the swap in phase B2 stops being invisible.
+    -->
+    <ProjectReference Include="..\..\src\TeamPortal.Mock\TeamPortal.Mock.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="AwesomeAssertions" />
+  </ItemGroup>
+
+</Project>

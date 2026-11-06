@@ -1,0 +1,18 @@
+@* Wraps ActivityList in a modal, so both sidebar buttons open the same thing. *@
+
+<MudDialog Class="app-dialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Title</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <ActivityList EntityName="@EntityName" EntityId="@EntityId" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Close">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>

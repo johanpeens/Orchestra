@@ -1,0 +1,184 @@
+@page "/context"
+@page "/package"
+@* Two routes on purpose. /package is what the section is called in the
+   app bar; /context is what it was called first and is still what the
+   {} button on the process screen links to. Breaking that to rename a
+   URL would be a poor trade. *@
+@attribute [Authorize]
+
+@* The whole portal as one JSON object, for pasting into a chatbot as context.
+
+   This was on EmptyLayout while it was a drill-down from the process screen -
+   a full-page view of one thing, with nothing around it to narrow the wall of
+   JSON. It is a top-level section now, and a section that removes the section
+   switcher is a dead end: the only way back would be a button most people will
+   not look for. So it keeps the app bar and loses only the folder rail, which
+   is what was actually costing the width - see AppSections.HasFolderRail. *@
+
+@using TeamPortal.Application.Dtos
+
+<PageTitle>My Training Data - Orchestra</PageTitle>
+
+<div class="app-context">
+
+    <header class="app-context__head">
+        <div>
+            <h1 class="app-context__title">My Training Data</h1>
+            <p class="app-context__subtitle">
+                Every folder, process and step as one JSON object. Paste it into a chatbot
+                so it knows how this business runs.
+            </p>
+        </div>
+
+        <div class="app-context__actions">
+            <MudButton StartIcon="@Icons.Material.Outlined.ArrowBack"
+                       Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       Href="/">
+                Back
+            </MudButton>
+
+            <MudButton StartIcon="@(_copied ? Icons.Material.Filled.Check : Icons.Material.Outlined.ContentCopy)"
+                       Variant="Variant.Filled"
+                       Color="@(_copied ? Color.Success : Color.Primary)"
+                       Disabled="@(_loading || _json.Length == 0)"
+                       OnClick="CopyAsync">
+                @(_copied ? "Copied" : "Copy JSON")
+            </MudButton>
+        </div>
+    </header>
+
+    <div class="app-context__bar">
+        <MudSwitch T="bool"
+                   Value="_includeImageData"
+                   ValueChanged="@(async (bool v) => await SetIncludeImagesAsync(v))"
+                   Color="Color.Primary"
+                   Label="Embed screenshots as base64" />
+
+        <span class="app-context__hint">
+            @if (_includeImageData)
+            {
+                <text>
+                    Self-contained - no sign-in needed to see the images, but the file gets
+                    large fast.
+                </text>
+            }
+            else
+            {
+                <text>
+                    Screenshots appear as URLs. Anything fetching them has to be signed in.
+                </text>
+            }
+        </span>
+
+        @if (_export is { } summary)
+        {
+            <MudSpacer />
+
+            <span class="app-context__counts">
+                @Plural(summary.FolderCount, "folder") &middot;
+                @Plural(summary.ProcessCount, "process", "processes") &middot;
+                @Plural(summary.StepCount, "step") &middot;
+                @Plural(summary.ScreenshotCount, "screenshot") &middot;
+                @SizeLabel
+            </span>
+        }
+    </div>
+
+    @if (_loading)
+    {
+        <LoadingPanel Message="@(_includeImageData ? "Reading screenshots..." : "Building the context...")" />
+    }
+    else if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Dense="true" role="alert">@_error</MudAlert>
+    }
+    else if (_export is { } portal)
+    {
+        @* An accordion, all of it shut on arrival. As one wall of JSON this was
+           unreadable - eight hundred lines with the thing you wanted somewhere
+           in the middle. Collapsed, the page opens on a list of folders and you
+           go down to what you are actually after.
+
+           Plain <details>, not MudExpansionPanels: these nest three deep, they
+           need no state in C#, and the browser remembers nothing between them.
+           A component per row would be three hundred circuit round trips to
+           open a folder. *@
+        <div class="app-context__tree">
+
+            <details class="app-context__node app-context__node--all">
+                <summary class="app-context__summary">
+                    <span class="app-context__nodename">Everything, as one object</span>
+                    <span class="app-context__nodemeta">@SizeLabel</span>
+                </summary>
+
+                @* Still here, and still a plain <pre> rather than a syntax
+                   highlighter: it is meant to be selected and copied, and a
+                   highlighter would put a span between every token. *@
+                <pre class="app-context__json" aria-label="The portal as JSON">@_json</pre>
+            </details>
+
+            @foreach (ExportFolderDto folder in portal.Folders)
+            {
+                <details class="app-context__node" @key="folder.Id">
+                    <summary class="app-context__summary">
+                        <span class="app-context__nodename">@folder.Name</span>
+                        <span class="app-context__nodemeta">
+                            @Plural(folder.Processes.Count, "process", "processes")
+                        </span>
+                    </summary>
+
+                    <div class="app-context__children">
+                        @foreach (ExportProcessDto process in folder.Processes)
+                        {
+                            <details class="app-context__node" @key="process.Id">
+                                <summary class="app-context__summary">
+                                    <span class="app-context__nodenum">@process.Position</span>
+                                    <span class="app-context__nodename">@process.Name</span>
+                                    <span class="app-context__nodemeta">
+                                        @(process.Department ?? "No business unit") &middot;
+                                        @Plural(process.Steps.Count, "step")
+                                    </span>
+                                </summary>
+
+                                <div class="app-context__children">
+                                    @if (process.Steps.Count == 0)
+                                    {
+                                        <p class="app-context__none">No steps written up yet.</p>
+                                    }
+
+                                    @foreach (ExportStepDto step in process.Steps)
+                                    {
+                                        <details class="app-context__node" @key="step.Id">
+                                            <summary class="app-context__summary">
+                                                <span class="app-context__nodenum">@step.Number</span>
+                                                <span class="app-context__nodename">@step.Name</span>
+                                                <span class="app-context__nodemeta">
+                                                    @if (step.ResponsiblePeople.Count > 0)
+                                                    {
+                                                        <text>@string.Join(", ", step.ResponsiblePeople)</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>Nobody assigned</text>
+                                                    }
+                                                    @if (step.Screenshots.Count > 0)
+                                                    {
+                                                        <text> &middot; @Plural(step.Screenshots.Count, "screenshot")</text>
+                                                    }
+                                                </span>
+                                            </summary>
+
+                                            <pre class="app-context__json">@Node(step)</pre>
+                                        </details>
+                                    }
+                                </div>
+                            </details>
+                        }
+                    </div>
+                </details>
+            }
+        </div>
+    }
+
+</div>

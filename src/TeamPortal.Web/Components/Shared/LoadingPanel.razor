@@ -1,0 +1,11 @@
+@* Shown while a service call is in flight. Every screen uses this rather than
+   rolling its own spinner - the mock services have a deliberate delay so that
+   the loading state gets built and tested from the start. *@
+
+@if (Visible)
+{
+    <div class="app-loading" role="status" aria-live="polite">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Medium" />
+        <MudText Typo="Typo.body2" Class="app-loading__text">@Message</MudText>
+    </div>
+}

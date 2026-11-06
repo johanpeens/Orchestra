@@ -1,0 +1,25 @@
+@* The process-side sidebar: PROCESSES heading, New Process action, one row per
+   folder, and View Process History pinned to the bottom. Matches docs/design/02. *@
+
+<AppSidebar Heading="Processes"
+            ActionText="New Folder"
+            OnAction="NewProcessAsync"
+            FooterText="View Process History"
+            FooterIcon="@Icons.Material.Outlined.History"
+            OnFooter="ViewHistoryAsync">
+    @if (_loading)
+    {
+        <LoadingPanel Message="Loading folders..." />
+    }
+    else
+    {
+        @foreach (var folder in _folders)
+        {
+            <SidebarItem Label="@folder.Name"
+                         Href="@($"/processes/{folder.Id}")"
+                         Count="folder.ProcessCount"
+                         Selected="@(folder.Id == SelectedFolderId)"
+                         OnDelete="@(() => DeleteFolderAsync(folder))" />
+        }
+    }
+</AppSidebar>

@@ -1,0 +1,44 @@
+@* The left column shared by both sections. The designs use the same skeleton on
+   every screen and only change the wording:
+
+     PROCESSES    [+ New Process]        ORGANIZATION   [+ Add Unit]
+     ...folder rows...                   ...unit rows...
+     [View Process History]              [View Activity Log]
+
+   Heading and action sit on ONE row. The footer button is pinned to the bottom. *@
+
+<div class="app-sidebar">
+    <div class="app-sidebar__head">
+        <span class="app-sidebar__heading">@Heading</span>
+
+        @if (!string.IsNullOrWhiteSpace(ActionText))
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Size="Size.Small"
+                       Color="Color.Default"
+                       StartIcon="@ActionIcon"
+                       Class="app-sidebar__action"
+                       OnClick="OnAction">
+                @ActionText
+            </MudButton>
+        }
+    </div>
+
+    <div class="app-sidebar__body">
+        @ChildContent
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(FooterText))
+    {
+        <div class="app-sidebar__foot">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       StartIcon="@FooterIcon"
+                       FullWidth="true"
+                       Class="app-sidebar__footbutton"
+                       OnClick="OnFooter">
+                @FooterText
+            </MudButton>
+        </div>
+    }
+</div>

@@ -1,0 +1,90 @@
+<Project>
+
+  <!-- ***************************************************************************
+       Purpose : Central package version management. Every package version in the
+                 solution is declared here exactly once.
+       Ticket  : SD-PENDING
+       ***************************************************************************
+       Date            By                      Action
+       ***************************************************************************
+       23 Aug 2026     Orchestra Team          Created
+       *************************************************************************** -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="UI">
+    <PackageVersion Include="MudBlazor" Version="9.8.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Framework">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.19" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.19" />
+  </ItemGroup>
+
+  <ItemGroup Label="Data">
+    <!-- Phase B1. Sqlite is a test-time dependency only - the real database is
+         SQL Server (see the ban on EF InMemory below and Frontend/BuildPlan.md,
+         Test Strategy). It is listed here rather than under "Testing" because it
+         is an EF Core provider, and central versioning groups the provider family
+         together. -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.19" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.19" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.19" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.19" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.19" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.19" />
+
+    <!-- The Identity base classes (IdentityUser&lt;TKey&gt; and friends) that
+         TeamPortal.Domain inherits from. This package carries no EF Core
+         dependency, so Domain stays persistence-ignorant. -->
+    <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="9.0.19" />
+  </ItemGroup>
+
+  <ItemGroup Label="Validation">
+    <!--
+      MailKit rather than System.Net.Mail.SmtpClient. Microsoft's own docs mark
+      SmtpClient obsolete for new work and point here, and there is a concrete
+      reason in this app: SmtpClient only speaks STARTTLS, so it cannot connect
+      to a server on port 465, which is implicit TLS. Our relay is on 465.
+    -->
+    <PackageVersion Include="MailKit" Version="4.17.0" />
+
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="NSubstitute" Version="6.2.0" />
+    <PackageVersion Include="bunit" Version="2.9.0" />
+
+    <!-- AwesomeAssertions, not FluentAssertions.
+         FluentAssertions 8.x moved to a paid Xceed commercial licence.
+         AwesomeAssertions is the Apache-2.0 fork of FluentAssertions 7 and is
+         API-identical, so `.Should().Be()` works unchanged. -->
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+  </ItemGroup>
+
+  <!-- ***************************************************************************
+       BANNED PACKAGES - see Frontend/BuildPlan.md, Test Strategy.
+
+       Microsoft.EntityFrameworkCore.InMemory is deliberately absent and must
+       never be added. It ignores unique indexes, foreign keys and query filters,
+       so tests pass against it while the real database rejects the same data.
+       Part B tests use Microsoft.EntityFrameworkCore.Sqlite instead.
+
+       FluentAssertions is deliberately absent. Version 8+ requires a paid
+       commercial licence. Use AwesomeAssertions above.
+       *************************************************************************** -->
+  <ItemGroup Label="Banned">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="0.0.0-banned" />
+    <PackageVersion Include="FluentAssertions" Version="0.0.0-banned" />
+  </ItemGroup>
+
+</Project>

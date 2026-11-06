@@ -1,0 +1,201 @@
+@page "/chat"
+@attribute [Authorize]
+@* Signed in, any role. The chat only ever reads, and it reads through the same
+   services every other screen uses, so it cannot show anybody anything the
+   process screens would not. *@
+
+@using TeamPortal.Application.Dtos
+
+<PageTitle>Chat - Orchestra</PageTitle>
+
+<AppPageHeader Title="Chat"
+               Description="A playground for the bot that answers on this business. Ask it anything staff would ask - every answer comes from your training data, so a wrong answer means the write-up needs work, not the bot.">
+    @* The material the bot answers from. It used to be a section in the app bar,
+       which put it a long way from the only screen it explains. When an answer
+       looks wrong this is where you go, so it sits where the wrong answer is. *@
+    <MudButton Variant="Variant.Outlined"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Outlined.DataObject"
+               Class="app-chat__training"
+               Href="/package">
+        My Training Data
+    </MudButton>
+
+    @if (_messages.Count > 0)
+    {
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Outlined.Refresh"
+                   Class="app-chat__clear"
+                   OnClick="ClearAsync">
+            Start over
+        </MudButton>
+    }
+</AppPageHeader>
+
+<div class="app-chat">
+    <div class="app-chat__body">
+
+    @* aria-live so a screen reader hears the answer arrive. Polite, not
+       assertive - an answer is not an interruption. *@
+    <div class="app-chat__log" role="log" aria-live="polite" aria-label="Conversation">
+
+        @if (_messages.Count == 0)
+        {
+            <div class="app-chat__empty">
+                <MudIcon Icon="@Icons.Material.Outlined.ChatBubbleOutline"
+                         Size="Size.Large"
+                         Class="app-chat__emptyicon" />
+
+                <div class="app-chat__emptytitle">Train the bot by testing it</div>
+
+                <p class="app-chat__emptybody">
+                    This is where you find out what the bot actually knows. It answers
+                    only from what is written up in the portal - the same record you can
+                    read under My Training Data - and says so when something is missing
+                    rather than inventing it.
+                </p>
+
+                <p class="app-chat__emptybody app-chat__emptybody--aside">
+                    So the way to teach it is to write the process up better. Ask the
+                    questions your team would ask; anything it cannot answer is a gap
+                    in the documentation, and filling that gap is the training.
+                </p>
+
+                @* Openers, because a blank box is the hardest thing to start
+                   from. They are real questions this data can answer, not
+                   decoration - each one is sent verbatim. *@
+                <div class="app-chat__suggestions">
+                    @foreach (string suggestion in Suggestions)
+                    {
+                        <button type="button"
+                                class="app-chat__suggestion"
+                                @onclick="@(() => AskAsync(suggestion))">
+                            @suggestion
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+        @foreach (ChatMessageDto message in _messages)
+        {
+            <div class="@BubbleClass(message)">
+                <div class="app-chat__who">
+                    @(message.Role == ChatRole.Person ? "You" : "Portal")
+                </div>
+
+                @* White-space preserved in CSS rather than parsed as markup -
+                   the answer is plain text and must never be treated as HTML. *@
+                <div class="app-chat__text">@message.Text</div>
+
+                @if (message.Images.Count > 0)
+                {
+                    <div class="app-chat__shots">
+                        @foreach (ChatImageDto image in message.Images)
+                        {
+                            @* Clicking opens the same full-screen viewer the step
+                               detail uses. A screenshot scaled into a chat bubble
+                               is recognisable and unreadable, which is the wrong
+                               half of what it is for. *@
+                            <button type="button"
+                                    class="app-chat__shot"
+                                    title="@($"{image.ProcessName} - {image.StepName}")"
+                                    @onclick="@(() => OpenImageAsync(image))">
+                                <img src="@image.Url" alt="@($"Screenshot of {image.StepName}")" />
+                                <span class="app-chat__shotcaption">@image.StepName</span>
+                            </button>
+                        }
+                    </div>
+                }
+
+                @if (message.Sources.Count > 0)
+                {
+                    <div class="app-chat__sources">
+                        <span class="app-chat__sourcelabel">From</span>
+
+                        @foreach (ChatSourceDto source in message.Sources)
+                        {
+                            <a class="app-chat__source"
+                               href="@($"/processes/{source.FolderId}/{source.ProcessId}")">
+                                @source.ProcessName
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (_thinking)
+        {
+            <div class="app-chat__bubble app-chat__bubble--portal">
+                <div class="app-chat__who">Portal</div>
+                <div class="app-chat__text app-chat__text--muted">Looking...</div>
+            </div>
+        }
+    </div>
+
+    @* Decoration, and marked as such - it says nothing the transcript does not,
+       so a screen reader should walk straight past it. Main.svg is the
+       artwork; drop an animated wwwroot/img/chatbot.gif in and that wins
+       instead. If neither is there the bot below is drawn in markup. *@
+    <aside class="app-chat__mascot" aria-hidden="true">
+        @if (MascotArt is { } art)
+        {
+            <img class="app-chat__mascotgif" src="@art" alt="" />
+        }
+        else
+        {
+            <div class="@MascotClass">
+                <svg class="app-chat__bot" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+                    @* Antenna *@
+                    <line class="app-chat__botantenna" x1="60" y1="18" x2="60" y2="34" />
+                    <circle class="app-chat__botblip" cx="60" cy="14" r="6" />
+
+                    @* Head *@
+                    <rect class="app-chat__bothead" x="18" y="34" width="84" height="64" rx="18" />
+
+                    @* Eyes. The blink is a scale on these two alone - blinking
+                       the whole head reads as a flinch. *@
+                    <g class="app-chat__boteyes">
+                        <circle cx="43" cy="64" r="7" />
+                        <circle cx="77" cy="64" r="7" />
+                    </g>
+
+                    @* Mouth *@
+                    <rect class="app-chat__botmouth" x="47" y="80" width="26" height="5" rx="2.5" />
+
+                    @* Body *@
+                    <rect class="app-chat__botbody" x="30" y="104" width="60" height="28" rx="12" />
+                </svg>
+            </div>
+        }
+    </aside>
+
+    </div>
+
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="app-chat__error">@_error</MudAlert>
+    }
+
+    <EditForm Model="this" OnValidSubmit="SendAsync" class="app-chat__composer">
+        <label class="app-visually-hidden" for="chat-input">Your question</label>
+
+        <input id="chat-input"
+               class="app-chat__input"
+               placeholder="Ask about a process, a business unit or a person..."
+               autocomplete="off"
+               disabled="@_thinking"
+               @bind="_draft"
+               @bind:event="oninput" />
+
+        <MudButton ButtonType="ButtonType.Submit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   EndIcon="@Icons.Material.Filled.Send"
+                   Disabled="@(!CanSend)"
+                   Class="app-chat__send">
+            Send
+        </MudButton>
+    </EditForm>
+</div>

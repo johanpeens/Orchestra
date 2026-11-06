@@ -1,0 +1,166 @@
+@page "/admin/registrations"
+@attribute [Authorize(Roles = AppRoles.Admin)]
+
+@* The approval queue. Admin only, twice over: this attribute keeps the page off
+   the router for everyone else, and IUserApprovalService checks the caller's
+   role again on every call - a grid of who has an account here is worth
+   something on its own. *@
+
+<PageTitle>Registrations - Orchestra</PageTitle>
+
+<AppPageHeader Title="Registrations"
+               Description="People who have asked for an account. Approve the ones you recognise.">
+    <MudButton StartIcon="@Icons.Material.Outlined.Refresh"
+               Variant="Variant.Outlined"
+               Color="Color.Primary"
+               OnClick="ReloadAsync"
+               Disabled="@_loading">
+        REFRESH
+    </MudButton>
+</AppPageHeader>
+
+<div class="app-registrations">
+
+    <MudTabs Elevation="0"
+             Rounded="true"
+             ApplyEffectsToContainer="true"
+             @bind-ActivePanelIndex="_activeTab"
+             Class="app-registrations__tabs">
+        @foreach (var tab in Tabs)
+        {
+            <MudTabPanel Text="@TabLabel(tab)" />
+        }
+    </MudTabs>
+
+    @if (_loading)
+    {
+        <LoadingPanel Message="Loading accounts..." />
+    }
+    else if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4" role="alert">
+            @_error
+        </MudAlert>
+    }
+    else if (_accounts.Count == 0)
+    {
+        <EmptyState Icon="@Icons.Material.Outlined.HowToReg"
+                    Title="Nothing to review"
+                    Description="@EmptyMessage" />
+    }
+    else
+    {
+        <MudTable Items="_accounts"
+                  Dense="true"
+                  Hover="true"
+                  Striped="false"
+                  Elevation="0"
+                  Class="app-registrations__table"
+                  T="UserAccountDto">
+            <HeaderContent>
+                <MudTh>Person</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Role</MudTh>
+                <MudTh>Registered</MudTh>
+                <MudTh Style="text-align:right">Actions</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Person">
+                    <div class="app-registrations__person">
+                        <MudAvatar Size="Size.Small" Color="Color.Primary">
+                            @context.Initials
+                        </MudAvatar>
+                        <span>@context.FullName</span>
+                    </div>
+                </MudTd>
+
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+
+                <MudTd DataLabel="Status">
+                    <MudChip T="string"
+                             Size="Size.Small"
+                             Variant="Variant.Text"
+                             Color="@StatusColour(context)">
+                        @StatusLabel(context)
+                    </MudChip>
+                </MudTd>
+
+                <MudTd DataLabel="Role">
+                    @if (context.ApprovalStatus == ApprovalStatus.Approved)
+                    {
+                        <MudSelect T="string"
+                                   Value="@context.PrimaryRole"
+                                   ValueChanged="@(role => ChangeRoleAsync(context, role))"
+                                   Dense="true"
+                                   Margin="Margin.Dense"
+                                   Variant="Variant.Outlined"
+                                   aria-label="@($"Role for {context.FullName}")"
+                                   Class="app-registrations__role">
+                            @foreach (string role in AppRoles.All)
+                            {
+                                <MudSelectItem T="string" Value="@role">@role</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else
+                    {
+                        <span class="app-registrations__muted">@context.PrimaryRole</span>
+                    }
+                </MudTd>
+
+                <MudTd DataLabel="Registered">
+                    <span class="app-registrations__muted">@Ago(context.RegisteredAt)</span>
+                </MudTd>
+
+                <MudTd DataLabel="Actions" Style="text-align:right">
+                    @if (context.IsAwaitingDecision)
+                    {
+                        <MudButton Size="Size.Small"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Disabled="@(_busyUserId == context.UserId)"
+                                   OnClick="@(() => ApproveAsync(context))"
+                                   Class="mr-2">
+                            Approve
+                        </MudButton>
+
+                        <MudButton Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   Disabled="@(_busyUserId == context.UserId)"
+                                   OnClick="@(() => RejectAsync(context))">
+                            Reject
+                        </MudButton>
+                    }
+                    else if (context.IsAwaitingConfirmation)
+                    {
+                        <span class="app-registrations__muted">Waiting on them</span>
+                    }
+                    else if (context.ApprovalStatus == ApprovalStatus.Approved)
+                    {
+                        <MudButton Size="Size.Small"
+                                   Variant="Variant.Text"
+                                   Color="Color.Error"
+                                   Disabled="@(_busyUserId == context.UserId)"
+                                   OnClick="@(() => RejectAsync(context))">
+                            Revoke
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Size="Size.Small"
+                                   Variant="Variant.Text"
+                                   Color="Color.Primary"
+                                   Disabled="@(_busyUserId == context.UserId)"
+                                   OnClick="@(() => ApproveAsync(context))">
+                            Approve after all
+                        </MudButton>
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
+</div>

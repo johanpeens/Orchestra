@@ -1,0 +1,46 @@
+@* Adds a folder to the process sidebar. The designs have no mockup for this, so
+   it is kept to the one field the model needs. *@
+
+<MudDialog Class="app-dialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Add Folder</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        @if (_formError is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4" role="alert">
+                @_formError
+            </MudAlert>
+        }
+
+        <label class="app-field__label" for="folder-name">Folder Name *</label>
+        <MudTextField @bind-Value="_name"
+                      @bind-Value:after="ClearErrors"
+                      id="folder-name"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Immediate="true"
+                      Placeholder="e.g. Client Onboarding"
+                      Error="@(_nameError is not null)"
+                      ErrorText="@_nameError" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Secondary"
+                   OnClick="SaveAsync"
+                   Disabled="@(!CanSave)">
+            Save
+        </MudButton>
+
+        <MudSpacer />
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   OnClick="Cancel"
+                   Disabled="_saving">
+            Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>

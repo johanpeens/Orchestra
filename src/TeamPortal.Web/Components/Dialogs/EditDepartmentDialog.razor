@@ -1,0 +1,96 @@
+@* Screen 07. Name field with a live preview chip, plus the eight theme swatches.
+   Save sits LEFT and Cancel RIGHT, per Frontend/TeamConventions.md. *@
+
+<MudDialog Class="app-dialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(IsNew ? "Add Department" : "Edit Department")</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        @if (_formError is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4" role="alert">
+                @_formError
+            </MudAlert>
+        }
+
+        <label class="app-field__label" for="dept-name">Department Name</label>
+        <div class="app-deptdialog__namerow">
+            <MudTextField @bind-Value="_name"
+                          @bind-Value:after="ClearErrors"
+                          id="dept-name"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Immediate="true"
+                          Error="@(_nameError is not null)"
+                          ErrorText="@_nameError"
+                          Placeholder="e.g. Business Enablement" />
+
+            <span class="app-deptdialog__preview" style="@PreviewStyle">
+                <span class="app-deptdialog__dot"></span>
+                Preview
+            </span>
+        </div>
+
+        <label class="app-field__label" id="swatch-label">Department Theme Color</label>
+        <div class="app-deptdialog__swatches" role="radiogroup" aria-labelledby="swatch-label">
+            @foreach (var swatch in BrandPalette.DepartmentSwatches)
+            {
+                var value = swatch;
+
+                <button type="button"
+                        class="@SwatchClass(value)"
+                        style="@($"background:{value};")"
+                        role="radio"
+                        aria-checked="@Checked(value)"
+                        aria-label="@($"Theme colour {value}")"
+                        @onclick="@(() => PickColour(value))">
+                    @if (string.Equals(_colour, value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+                    }
+                </button>
+            }
+        </div>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Secondary"
+                   OnClick="SaveAsync"
+                   Disabled="@(!CanSave)">
+            @if (_saving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <span>Saving...</span>
+            }
+            else
+            {
+                <span>Save Changes</span>
+            }
+        </MudButton>
+
+        <MudSpacer />
+
+        @* Only on an existing department - there is nothing to delete while you
+           are still creating one. Furthest from Save, because the two are not
+           the same kind of action and should not sit next to each other. *@
+        @if (!IsNew)
+        {
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Error"
+                       StartIcon="@Icons.Material.Outlined.DeleteOutline"
+                       OnClick="DeleteAsync"
+                       Disabled="_saving">
+                Delete
+            </MudButton>
+        }
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   OnClick="Cancel"
+                   Disabled="_saving">
+            Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>

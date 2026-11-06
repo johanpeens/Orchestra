@@ -1,0 +1,60 @@
+@* Shared history list. Backs both "View Activity Log" and "View Process History"
+   - the two differ only in what they are scoped to. Newest first, paged. *@
+
+<div class="app-activity">
+    @if (_loading)
+    {
+        <LoadingPanel Message="Loading history..." />
+    }
+    else if (_page.TotalCount == 0)
+    {
+        <EmptyState Title="Nothing has happened here yet"
+                    Description="Actions appear here as soon as someone makes a change."
+                    Icon="@Icons.Material.Outlined.History" />
+    }
+    else
+    {
+        <ul class="app-activity__list">
+            @foreach (var entry in _page.Items)
+            {
+                <li class="app-activity__item">
+                    <span class="app-activity__badge" title="@entry.Action.ToString()">
+                        <MudIcon Icon="@IconFor(entry.Action)" Size="Size.Small" />
+                    </span>
+
+                    <div class="app-activity__body">
+                        <div class="app-activity__summary">@entry.Summary</div>
+                        <div class="app-activity__meta">
+                            @(entry.UserFullName ?? "System")
+                            &middot;
+                            @entry.HappenedAt.ToLocalTime().ToString("d MMM yyyy, HH:mm")
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+
+        @if (_page.TotalPages > 1)
+        {
+            <div class="app-activity__pager">
+                <MudButton Variant="Variant.Outlined"
+                           Size="Size.Small"
+                           Disabled="@(!_page.HasPrevious)"
+                           OnClick="PreviousAsync">
+                    Previous
+                </MudButton>
+
+                <span class="app-activity__pagecount">
+                    Page @_page.Page of @_page.TotalPages
+                </span>
+
+                <MudButton Variant="Variant.Outlined"
+                           Size="Size.Small"
+                           Disabled="@(!_page.HasNext)"
+                           OnClick="NextAsync">
+                    Next
+                </MudButton>
+            </div>
+        }
+    }
+</div>

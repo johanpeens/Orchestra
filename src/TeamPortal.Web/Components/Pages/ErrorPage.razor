@@ -1,0 +1,29 @@
+@page "/Error"
+@attribute [AllowAnonymous]
+@* An error page that needs a login to read is an error page nobody reads. *@
+
+<PageTitle>Error</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Elevation="1" Class="pa-8">
+        <MudText Typo="Typo.overline" Color="Color.Error">Error</MudText>
+        <MudText Typo="Typo.h4" Color="Color.Primary" GutterBottom="true">
+            Something went wrong
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            An error occurred while processing your request. Please try again, and quote
+            the reference below if you need to report it.
+        </MudText>
+
+        @if (ShowRequestId)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
+                Reference: <code>@RequestId</code>
+            </MudAlert>
+        }
+
+        <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary">
+            Back to the portal
+        </MudButton>
+    </MudPaper>
+</MudContainer>

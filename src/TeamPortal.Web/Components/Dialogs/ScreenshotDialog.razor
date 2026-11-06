@@ -1,0 +1,31 @@
+@* A screenshot at full size. The step detail scales it down to fit beside the
+   description, which is fine for recognising it and useless for reading the
+   text in it - which is the whole reason somebody attached a screenshot. *@
+
+<MudDialog>
+    <TitleContent>
+        <div class="app-shotdialog__title">
+            <MudIcon Icon="@Icons.Material.Outlined.Image" Size="Size.Small" />
+            <span>@FileName</span>
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @* Clicking the image closes it, the way a lightbox does everywhere else.
+           The button is what makes that reachable from a keyboard as well. *@
+        <button type="button"
+                class="app-shotdialog__surface"
+                aria-label="Close the screenshot"
+                @onclick="Close">
+            <img class="app-shotdialog__image" src="@Url" alt="@FileName" />
+        </button>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Href="@Url" Target="_blank" StartIcon="@Icons.Material.Outlined.OpenInNew">
+            Open in a new tab
+        </MudButton>
+
+        <MudButton OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>

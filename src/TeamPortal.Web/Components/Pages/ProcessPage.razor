@@ -1,0 +1,281 @@
+@page "/processes"
+@page "/processes/{FolderId:int}"
+@page "/processes/{FolderId:int}/{ProcessId:int}"
+@attribute [Authorize]
+@* Signed in, any role. What a role may CHANGE is enforced in the services -
+   see AuthorisationGuard. Hiding a button is not security. *@
+
+@* Screen 02.
+
+   A folder holds a sequence of PROCESSES - those are the cards in the flow strip.
+   Each process holds a sequence of STEPS - the numbered list underneath. Back and
+   Next walk the steps, and running off the end of one process moves on to the
+   first step of the next one.
+
+   See docs/design/02-process-dashboard.png. *@
+
+<PageTitle>@(_folderName ?? "Process") - Orchestra</PageTitle>
+
+@if (_loading)
+{
+    <LoadingPanel Message="Loading processes..." />
+}
+else if (_processes.Count == 0)
+{
+    <AppPageHeader Title="Process" Description="This folder has no processes in it yet.">
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Class="app-process__add"
+                   OnClick="AddProcessAsync">
+            Add Process
+        </MudButton>
+    </AppPageHeader>
+
+    <EmptyState Title="No processes yet"
+                Description="Add the first process to start mapping this area out."
+                Icon="@Icons.Material.Outlined.AccountTree" />
+}
+else
+{
+    @* With the strip open, the selected card already says which process you are
+       on. Closed, "Process" was the only heading and it named nothing - so the
+       title carries the process itself once the strip is hidden. *@
+    <AppPageHeader Title="@HeaderTitle" Description="@SelectedProcess?.Description">
+        @* The key to the strip's colours. Each card's number badge is painted
+           its business unit's colour; on its own that is decoration, because
+           nothing on screen says which colour means what. So the legend shows
+           WITH the strip, not instead of it - a legend with nothing to explain
+           is just a list. *@
+        @if (_flowVisible && DepartmentLegend.Count > 0)
+        {
+            <div class="app-flowlegend" aria-label="Business units in this folder">
+                @foreach (DepartmentLegendItem unit in DepartmentLegend)
+                {
+                    <span class="app-flowlegend__item"
+                          style="@($"--tag-colour:{unit.Colour};")"
+                          @key="unit.Name">
+                        <span class="app-flowlegend__swatch" aria-hidden="true"></span>
+                        <span class="app-flowlegend__name">@unit.Name</span>
+                        <span class="app-flowlegend__count">@unit.Count</span>
+                    </span>
+                }
+            </div>
+        }
+
+        @* Shows and hides the PROCESS FLOW strip, which starts hidden. It is
+           seven cards tall on a laptop and mostly in the way once you are
+           reading one process's steps; the legend below stands in for it. *@
+        <MudIconButton Icon="@(_flowVisible ? Icons.Material.Outlined.UnfoldLess : Icons.Material.Outlined.UnfoldMore)"
+                       Variant="Variant.Outlined"
+                       Class="app-process__flowtoggle"
+                       aria-label="@(_flowVisible ? "Hide the process flow" : "Show the process flow")"
+                       aria-expanded="@(_flowVisible ? "true" : "false")"
+                       title="@(_flowVisible ? "Hide the process flow" : "Show the process flow")"
+                       OnClick="ToggleFlow" />
+
+        <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                       Variant="Variant.Outlined"
+                       aria-label="Edit this process"
+                       OnClick="EditProcessAsync" />
+
+        @* One button, then a question. The page holds two things you can add and
+           they are a level apart - a process is a card in the strip, a step is a
+           row inside the one you are reading - so a single "Add Process" while a
+           plus floated in the rail was two buttons for one intention. *@
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Class="app-process__add"
+                   OnClick="AddSomethingAsync">
+            Add
+        </MudButton>
+    </AppPageHeader>
+
+    @if (_flowVisible)
+    {
+    <section class="app-flowstrip" aria-label="Process flow"
+             @onmouseleave="ClearPreview">
+        <div class="app-flowstrip__heading">Process Flow</div>
+
+        <div class="app-flowstrip__rail">
+            @for (int i = 0; i < _processes.Count; i++)
+            {
+                var process = _processes[i];
+
+                <ProcessFlowCard Process="process"
+                                 Number="@(i + 1)"
+                                 Selected="@(process.Id == _selectedProcessId)"
+                                 OnSelect="SelectProcessAsync"
+                                 OnOpenDetail="OpenProcessDetailAsync"
+                                 OnPreviewWanted="LoadPreviewAsync"
+                                 @key="process.Id" />
+            }
+        </div>
+
+        @* Under the rail, not over a card. The rail scrolls horizontally, so a
+           floating panel would be clipped by its overflow. *@
+        @if (HoveredProcess is { } hovered)
+        {
+            <div class="app-flowstrip__preview" style="@PreviewStyle" role="status" aria-live="polite">
+                <ProcessPreviewPanel Process="hovered" Detail="@PreviewFor(hovered.Id)" />
+            </div>
+        }
+    </section>
+    }
+    <div class="app-process">
+        <div class="app-process__list">
+            <div class="app-process__listheading">Process Steps</div>
+            <div class="app-process__listname">@SelectedProcess?.Name</div>
+
+            @if (_steps.Count == 0)
+            {
+                <MudText Typo="Typo.body2" Class="app-process__nosteps">
+                    No steps written up yet.
+                </MudText>
+            }
+            else
+            {
+                <nav aria-label="Steps in this process">
+                    @foreach (var step in _steps)
+                    {
+                        var id = step.Id;
+
+                        <button type="button"
+                                class="@StepRowClass(id)"
+                                aria-current="@(id == _selectedStepId ? "step" : null)"
+                                @onclick="@(() => SelectStep(id))">
+                            <span class="app-process__rownum">@step.StepNumber</span>
+                            <span class="app-process__rowname">@step.Name</span>
+                        </button>
+                    }
+                </nav>
+            }
+        </div>
+
+        <div class="app-process__detail">
+            @if (SelectedStep is { } selected)
+            {
+                <div class="app-process__detailhead">
+                    <MudText Typo="Typo.h6">
+                        Step @selected.StepNumber: @selected.Name
+                    </MudText>
+
+                    @if (!string.IsNullOrWhiteSpace(selected.DepartmentName))
+                    {
+                        <span class="app-stepcard__tag"
+                              style="@($"--tag-colour:{selected.DepartmentColour};")">
+                            @selected.DepartmentName
+                        </span>
+                    }
+
+                    <MudSpacer />
+
+                    <MudButton Variant="Variant.Outlined"
+                               Size="Size.Small"
+                               StartIcon="@Icons.Material.Outlined.Edit"
+                               Class="app-process__upload"
+                               OnClick="@(() => EditStepAsync(selected.Id))">
+                        Edit Step
+                    </MudButton>
+                </div>
+
+                @if (selected.HasImages)
+                {
+                    @* A button, not a bare img with an onclick. The pane scales
+                       the screenshot down to fit beside the description, which is
+                       fine for recognising it and useless for reading the text in
+                       it - so it opens full size. Being a button is what makes
+                       that reachable from a keyboard. *@
+                    <button type="button"
+                            class="app-process__shotbutton"
+                            aria-label="@($"Open the screenshot for {selected.Name} full size")"
+                            @onclick="@(() => OpenScreenshotAsync(selected.Images[0]))">
+                        <img class="app-process__shot"
+                             src="@selected.Images[0].Url"
+                             alt="@($"Reference screenshot for {selected.Name}")" />
+                    </button>
+                }
+                else
+                {
+                    <div class="app-process__shot app-process__shot--empty">
+                        <MudText Typo="Typo.body2">No screenshot uploaded yet.</MudText>
+                    </div>
+                }
+            }
+            else
+            {
+                <EmptyState Title="This process has no steps yet"
+                            Description="Add the first step to start mapping it out."
+                            Icon="@Icons.Material.Outlined.Timeline" />
+            }
+        </div>
+
+        <aside class="app-process__side" aria-label="Step description and owners">
+            <MudText Typo="Typo.subtitle1" Class="app-process__sidehead">
+                Step Description
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="app-process__sidebody">
+                @(SelectedStep is null
+                    ? "Pick a step to see its description."
+                    : string.IsNullOrWhiteSpace(SelectedStep.Description)
+                        ? "No description has been written for this step yet."
+                        : SelectedStep.Description)
+            </MudText>
+
+            <MudText Typo="Typo.subtitle1" Class="app-process__sidehead">
+                Responsible Persons
+            </MudText>
+
+            @if (SelectedStep is null || !SelectedStep.HasOwners)
+            {
+                <MudText Typo="Typo.body2" Class="app-process__sidebody">
+                    Nobody is assigned to this step.
+                </MudText>
+            }
+            else
+            {
+                @foreach (var owner in SelectedStep.Owners)
+                {
+                    <div class="app-process__owner">
+                        @* justification: the initials repeat the name printed
+                           immediately beside them. *@
+                        <MudAvatar Size="Size.Small"
+                                   Class="app-process__ownerinitials"
+                                   aria-hidden="true">
+                            @owner.Initials
+                        </MudAvatar>
+
+                        <div>
+                            <div class="app-process__ownername">@owner.FullName</div>
+                            <div class="app-process__ownerrole">@owner.JobTitle</div>
+                        </div>
+                    </div>
+                }
+            }
+        </aside>
+    </div>
+
+    <div class="app-process__nav">
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Disabled="@(!HasPrevious)"
+                   OnClick="GoPreviousAsync">
+            Back
+        </MudButton>
+
+        <MudSpacer />
+
+        <span class="app-process__navhint">@NavHint</span>
+
+        <MudSpacer />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(!HasNext)"
+                   OnClick="GoNextAsync">
+            Next
+        </MudButton>
+    </div>
+}

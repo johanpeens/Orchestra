@@ -1,0 +1,42 @@
+<Project>
+
+  <!-- ***************************************************************************
+       Purpose : Settings applied to every project in the solution.
+       Ticket  : SD-PENDING
+       ***************************************************************************
+       Date            By                      Action
+       ***************************************************************************
+       23 Aug 2026     Orchestra Team          Created
+       *************************************************************************** -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- CI gate 2: warnings are errors on every project. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!--
+      OFF, deliberately. Invariant globalization trims the ICU data and is the
+      right default for a container, but Microsoft.Data.SqlClient asks for the
+      "en-us" culture while opening a connection and throws
+      CultureNotFoundException without it. `dotnet ef` fails the same way. This
+      was harmless while the app ran on in-memory lists and became a start-up
+      crash the moment phase B2 pointed it at SQL Server.
+    -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- Test projects are never packed and never shipped. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+</Project>
